@@ -1,26 +1,111 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --font-inter: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+* {
+  box-sizing: border-box;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: #0B0F14;
+  color: #E5E7EB;
+  font-family: var(--font-inter);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
+
+/* ── Button glow (green) ── */
+@keyframes green-glow {
+  0%, 100% {
+    box-shadow:
+      0 0 0 0 #4F6F5233,
+      0 1px 3px 0 #00000060;
+  }
+  50% {
+    box-shadow:
+      0 0 0 3px #4F6F5218,
+      0 0 18px 4px #4F6F5220,
+      0 1px 3px 0 #00000060;
+  }
+}
+.glow-btn {
+  animation: green-glow 3s ease-in-out infinite;
+}
+
+/* ── Live indicator ── */
+@keyframes live-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.3; transform: scale(0.85); }
+}
+.live-dot {
+  animation: live-pulse 1.4s ease-in-out infinite;
+}
+
+/* ── Step indicator tick ── */
+@keyframes step-in {
+  from { opacity: 0; transform: translateX(-6px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+.step-in {
+  animation: step-in 0.25s ease forwards;
+}
+
+/* ── Subtle grid ── */
+.grid-bg {
+  background-image:
+    linear-gradient(rgba(79, 111, 82, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(79, 111, 82, 0.035) 1px, transparent 1px);
+  background-size: 52px 52px;
+}
+
+/* ── Card hover ── */
+.card-lift {
+  transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+}
+.card-lift:hover {
+  transform: translateY(-2px);
+  border-color: #4F6F5235;
+  box-shadow: 0 8px 32px -8px #4F6F5215;
+}
+
+/* ── Table row hover ── */
+.trow {
+  transition: background 0.12s ease;
+}
+.trow:hover {
+  background: #4F6F520A;
+}
+
+/* ── Scrollstep fade ── */
+.step-content {
+  transition: opacity 0.35s ease, transform 0.35s ease;
+}
+.step-content.active {
+  opacity: 1;
+  transform: translateY(0);
+}
+.step-content.inactive {
+  opacity: 0;
+  transform: translateY(8px);
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+}
+
+/* ── Terminal text selection ── */
+.terminal ::selection {
+  background: #4F6F5230;
+  color: #E5E7EB;
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #1F2937; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #374151; }
