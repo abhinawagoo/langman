@@ -44,7 +44,7 @@ function Nav() {
             <Shield size={13} className="text-[#6B8F6E]" />
           </div>
           <span className="font-semibold text-[#E5E7EB] tracking-tight">
-            Langman
+            Dottle
           </span>
           <span className="hidden sm:inline-block text-[10px] text-[#6B8F6E] bg-[#4F6F5212] border border-[#4F6F5228] px-2 py-0.5 rounded-full font-medium uppercase tracking-wider">
             Beta
@@ -81,7 +81,7 @@ function FailureCard() {
           <span className="w-2.5 h-2.5 rounded-full bg-[#F59E0B60]" />
           <span className="w-2.5 h-2.5 rounded-full bg-[#22C55E60]" />
           <span className="ml-3 text-[11px] text-[#374151] font-mono">
-            langman · run monitor
+            dottle · run monitor
           </span>
           <span className="ml-auto flex items-center gap-1.5 text-[11px] text-[#4F6F52]">
             <span className="live-dot w-1.5 h-1.5 rounded-full bg-[#4F6F52] inline-block" />
@@ -151,7 +151,7 @@ function FailureCard() {
         {/* Root cause */}
         <div className="mx-4 mb-4 rounded-xl border border-[#4F6F5225] bg-[#4F6F520C] p-3.5">
           <p className="text-[10px] text-[#6B8F6E] font-semibold uppercase tracking-widest mb-2">
-            Root cause — Langman
+            Root cause — Dottle
           </p>
           <p className="text-[#9CA3AF] text-xs font-mono leading-[1.6]">
             <span className="text-[#86EFAC]">max_retries</span>=0 · no backoff
@@ -202,7 +202,7 @@ function Hero() {
             </h1>
 
             <p className="text-[1.05rem] text-[#6B7280] leading-[1.75] mb-9 max-w-[500px]">
-              Langman detects failures, explains why they happen, and helps you
+              Dottle detects failures, explains why they happen, and helps you
               fix them{" "}
               <span className="text-[#9CA3AF]">
                 before your users complain.
@@ -345,7 +345,7 @@ const STEPS: Step[] = [
     label: "No clear root cause",
     description:
       "All three runs failed. You dig through logs for hours. Every error says 'exit code 1'. Nothing tells you why.",
-    highlight: "Langman identifies root cause in < 10 seconds",
+    highlight: "Dottle identifies root cause in < 10 seconds",
     logs: [
       { time: "12:04:47", level: "error",   text: "run_id=18291  failed · exit code 1" },
       { time: "12:04:11", level: "error",   text: "run_id=18292  failed · exit code 1" },
@@ -583,13 +583,13 @@ function ScrollSteps() {
                     ))}
                   </div>
 
-                  {/* Step 3 special: Langman detects */}
+                  {/* Step 3 special: Dottle detects */}
                   {activeStep === 3 && (
                     <div className="mt-5 rounded-xl border border-[#4F6F5228] bg-[#4F6F520C] p-4">
                       <div className="flex items-center gap-2 mb-2.5">
                         <CheckCircle2 size={13} className="text-[#4F6F52]" />
                         <span className="text-[11px] text-[#6B8F6E] font-semibold uppercase tracking-widest">
-                          Root cause — Langman analysis
+                          Root cause — Dottle analysis
                         </span>
                       </div>
                       <p className="text-xs font-mono text-[#9CA3AF] leading-[1.6]">
@@ -668,7 +668,7 @@ function Solution() {
           </h2>
           <p className="text-[#6B7280] text-[15px] leading-relaxed">
             Other tools give you observability — a passive stream of data you
-            still have to interpret. Langman does the analysis for you.
+            still have to interpret. Dottle does the analysis for you.
           </p>
         </div>
 
@@ -774,13 +774,13 @@ function HowItWorks() {
 // ─────────────────────────────────────────────────────────────────────────────
 
 function Comparison() {
-  const rows: { label: string; traditional: string; langman: string }[] = [
-    { label: "What you see",       traditional: "Logs and traces",        langman: "Failure diagnosis"        },
-    { label: "Debugging",          traditional: "You do it manually",     langman: "Root cause explained"     },
-    { label: "Alerting",           traditional: "Passive dashboards",     langman: "Real-time alerts"         },
-    { label: "Analysis timing",    traditional: "Post-mortem",            langman: "Instant, as it happens"   },
-    { label: "Loop detection",     traditional: "Not detected",           langman: "Caught automatically"     },
-    { label: "Root cause",         traditional: "You figure it out",      langman: "Suggested by Langman"     },
+  const rows: { label: string; traditional: string; dottle: string }[] = [
+    { label: "What you see",       traditional: "Logs and traces",        dottle: "Failure diagnosis"        },
+    { label: "Debugging",          traditional: "You do it manually",     dottle: "Root cause explained"     },
+    { label: "Alerting",           traditional: "Passive dashboards",     dottle: "Real-time alerts"         },
+    { label: "Analysis timing",    traditional: "Post-mortem",            dottle: "Instant, as it happens"   },
+    { label: "Loop detection",     traditional: "Not detected",           dottle: "Caught automatically"     },
+    { label: "Root cause",         traditional: "You figure it out",      dottle: "Suggested by Dottle"     },
   ];
 
   return (
@@ -794,7 +794,7 @@ function Comparison() {
           </h2>
           <p className="text-[#6B7280] text-[15px] leading-relaxed">
             Langfuse, LangSmith, and Datadog show you data.
-            Langman tells you what went wrong and why.
+            Dottle tells you what went wrong and why.
           </p>
         </div>
 
@@ -813,7 +813,7 @@ function Comparison() {
             </div>
             <div className="px-6 py-4 border-l border-[#1F2937]">
               <p className="text-[11px] text-[#4F6F52] uppercase tracking-widest font-semibold">
-                Langman
+                Dottle
               </p>
               <p className="text-[10px] text-[#374151] mt-0.5">
                 Active failure detection
@@ -821,7 +821,7 @@ function Comparison() {
             </div>
           </div>
 
-          {rows.map(({ label, traditional, langman }, i) => (
+          {rows.map(({ label, traditional, dottle }, i) => (
             <div
               key={label}
               className={`trow grid grid-cols-3 border-b border-[#1F2937] last:border-0 ${
@@ -835,7 +835,7 @@ function Comparison() {
               </div>
               <div className="px-6 py-4 text-sm text-[#E5E7EB] border-l border-[#1F2937] flex items-center gap-2">
                 <CheckCircle2 size={13} className="text-[#4F6F52] shrink-0" />
-                {langman}
+                {dottle}
               </div>
             </div>
           ))}
@@ -864,7 +864,7 @@ function WhoItsFor() {
     {
       icon: <Terminal size={18} />,
       title: "Engineers tired of debugging blindly",
-      body: "You've spent hours in logs with no answers. Langman tells you what broke in seconds.",
+      body: "You've spent hours in logs with no answers. Dottle tells you what broke in seconds.",
     },
   ];
 
@@ -1017,7 +1017,7 @@ function CTA() {
                 Book a 15-min demo
               </h3>
               <p className="text-[#6B7280] text-sm mt-1.5 leading-relaxed">
-                Talk to us directly. We&apos;ll show you how Langman works on
+                Talk to us directly. We&apos;ll show you how Dottle works on
                 a real agent and answer any questions.
               </p>
             </div>
@@ -1081,12 +1081,12 @@ function Footer() {
           <div className="w-5 h-5 rounded-md bg-[#2F3E2C] border border-[#4F6F5230] flex items-center justify-center">
             <Shield size={11} className="text-[#6B8F6E]" />
           </div>
-          <span className="text-sm font-medium text-[#4B5563]">Langman</span>
+          <span className="text-sm font-medium text-[#4B5563]">Dottle</span>
         </div>
         <p className="text-[13px] text-[#2D3748]">
           Built for teams running AI agents in production.
         </p>
-        <p className="text-[13px] text-[#2D3748]">© 2025 Langman</p>
+        <p className="text-[13px] text-[#2D3748]">© 2026 Dottle</p>
       </div>
     </footer>
   );
