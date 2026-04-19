@@ -1,1116 +1,942 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback } from "react";
-import {
-  AlertTriangle,
-  CheckCircle2,
-  XCircle,
-  ArrowRight,
-  Zap,
-  Eye,
-  GitBranch,
-  Shield,
-  Activity,
-  RefreshCw,
-  Terminal,
-  Bell,
-  Users,
-  Code2,
-  Cpu,
-  ChevronRight,
-  Calendar,
-} from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import Link from "next/link";
 
-// ─────────────────────────────────────────────────────────────────────────────
-// DESIGN TOKENS
-// ─────────────────────────────────────────────────────────────────────────────
-// Primary brand: #4F6F52 (forest green)
-// Primary dark:  #2F3E2C
-// Primary light: #6B8F6E
-// BG card:       #080C10
-// BG card2:      #0d1117
-// Border:        #1F2937
+// ─── Responsive hook ───────────────────────────────────────────────────────────
+function useWindowWidth() {
+  const [w, setW] = useState(1280);
+  useEffect(() => {
+    setW(window.innerWidth);
+    const onResize = () => setW(window.innerWidth);
+    window.addEventListener("resize", onResize, { passive: true });
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+  return w;
+}
 
-// ─────────────────────────────────────────────────────────────────────────────
-// NAV
-// ─────────────────────────────────────────────────────────────────────────────
+// ─── Design tokens ─────────────────────────────────────────────────────────────
+const REGISTER = "https://app.dottle.dev/register";
+const LOGIN    = "https://app.dottle.dev/login";
+const CAL      = "https://cal.com/abhinawago/30min";
+const A      = "#D97757";
+const BG     = "#FAFAF9";
+const FG     = "#111111";
+const MUTED  = "rgba(17,17,17,0.6)";
+const LINE   = "rgba(0,0,0,0.08)";
+const PANEL  = "#FFFFFF";
+const DBG    = "#082a3a";
+const DFG    = "#FAFAF9";
+const DMUTED = "rgba(250,250,249,0.55)";
+const _DLINE = "rgba(255,255,255,0.08)"; void _DLINE;
 
-function Nav() {
+// ─── Icons ─────────────────────────────────────────────────────────────────────
+function IcoArrow() {
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 border-b border-[#1F2937] bg-[#0B0F14]/85 backdrop-blur-xl">
-      <div className="max-w-6xl mx-auto px-6 h-14 flex items-center justify-between">
-        <div className="flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded-lg bg-[#2F3E2C] border border-[#4F6F5240] flex items-center justify-center">
-            <Shield size={13} className="text-[#6B8F6E]" />
-          </div>
-          <span className="font-semibold text-[#E5E7EB] tracking-tight">
-            Dottle
-          </span>
-          <span className="hidden sm:inline-block text-[10px] text-[#6B8F6E] bg-[#4F6F5212] border border-[#4F6F5228] px-2 py-0.5 rounded-full font-medium uppercase tracking-wider">
-            Beta
-          </span>
-        </div>
+    <svg viewBox="0 0 16 16" width={14} height={14} fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M3 8h10M9 4l4 4-4 4" />
+    </svg>
+  );
+}
+function IcoCheck({ size = 14 }: { size?: number }) {
+  return (
+    <svg viewBox="0 0 16 16" width={size} height={size} fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M3 8.5l3.2 3.2L13 5" />
+    </svg>
+  );
+}
+function IcoSpark() {
+  return (
+    <svg viewBox="0 0 16 16" width={14} height={14} fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M8 1.5v4M8 10.5v4M1.5 8h4M10.5 8h4M3.5 3.5l2.8 2.8M9.7 9.7l2.8 2.8M12.5 3.5L9.7 6.3M6.3 9.7L3.5 12.5" />
+    </svg>
+  );
+}
+function IcoAlert() {
+  return (
+    <svg viewBox="0 0 16 16" width={14} height={14} fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M8 1.5L15 14H1z M8 6v4 M8 12v.01" />
+    </svg>
+  );
+}
+function IcoTrace() {
+  return (
+    <svg viewBox="0 0 16 16" width={14} height={14} fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="1.5" y="3"  width="9"  height="2" rx="1" />
+      <rect x="3"   y="7"  width="10" height="2" rx="1" />
+      <rect x="5.5" y="11" width="7"  height="2" rx="1" />
+    </svg>
+  );
+}
+function IcoFlask() {
+  return (
+    <svg viewBox="0 0 16 16" width={14} height={14} fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M6 1.5h4M6.5 1.5v4L3 12.5a1.5 1.5 0 001.3 2.3h7.4a1.5 1.5 0 001.3-2.3L9.5 5.5v-4" />
+      <path d="M4.5 10h7" />
+    </svg>
+  );
+}
+function IcoSlack() {
+  return (
+    <svg viewBox="0 0 16 16" width={14} height={14} fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="2"  y="6"  width="4" height="2" rx="1" />
+      <rect x="10" y="8"  width="4" height="2" rx="1" />
+      <rect x="6"  y="2"  width="2" height="4" rx="1" />
+      <rect x="8"  y="10" width="2" height="4" rx="1" />
+      <rect x="6"  y="6"  width="4" height="4" rx="1" />
+    </svg>
+  );
+}
 
-        <div className="flex items-center gap-5">
-          <span className="hidden sm:inline text-sm text-[#4B5563] hover:text-[#9CA3AF] cursor-pointer transition-colors">
-            Docs
-          </span>
-          <a
-            href="#cta"
-            className="glow-btn text-sm font-medium bg-[#4F6F52] hover:bg-[#3D5940] text-white px-4 py-2 rounded-lg transition-colors"
-          >
-            Get monitored free
-          </a>
+// ─── Data ──────────────────────────────────────────────────────────────────────
+const ALERT_DATA = [
+  {
+    phrase: "users complain",
+    desc: "Dottle correlates complaint spikes to agent run failures in real time — before your on-call even wakes up.",
+  },
+  {
+    phrase: "your agent silently fails",
+    desc: "status=OK in your logs, broken output for your user. Dottle detects silent regressions no logger will ever catch.",
+  },
+  {
+    phrase: "tools start failing",
+    desc: "One flaky API call cascades into 43 retries. Dottle catches the pattern and alerts you before costs spiral.",
+  },
+  {
+    phrase: "your agent refuses a request",
+    desc: "Model safety filters or prompt drift blocking legitimate requests. Dottle flags refusal rate spikes instantly.",
+  },
+  {
+    phrase: "new models misbehave",
+    desc: "You shipped a new model. Dottle A/B compares output quality and alerts on the first sign of regression.",
+  },
+  {
+    phrase: "trajectories go abnormal",
+    desc: "Your agent took 47 steps when it usually takes 8. Dottle catches runaway planning loops in under 10 seconds.",
+  },
+  {
+    phrase: "latency crosses p95",
+    desc: "p95 latency just crossed your SLA. Dottle traces the slowest run end-to-end and shows you exactly which step caused it.",
+  },
+  {
+    phrase: "costs spike on a tenant",
+    desc: "One tenant is burning 40× their usual token budget. Dottle isolates cost anomalies before they hit your invoice.",
+  },
+];
+
+const FEATURES = [
+  { kicker: "Detect",     title: "Detect failures automatically",     body: "Loops, tool errors, bad outputs — caught the moment they happen. No manual thresholds or configs.",                   icon: IcoSpark  },
+  { kicker: "Trace",      title: "Trace every agent run",             body: "Every step, tool call, and LLM decision captured end-to-end. Full timeline, not just error lines.",                  icon: IcoTrace  },
+  { kicker: "Isolate",    title: "Highlight exactly where it failed", body: 'Not "something broke at step 4." The exact call, input, and response — isolated and explained.',                    icon: IcoAlert  },
+  { kicker: "Diagnose",   title: "Suggest the root cause",            body: "Pattern-matched diagnosis across thousands of agent runs. We tell you why and how to fix it.",                       icon: IcoCheck  },
+  { kicker: "Experiment", title: "A/B test prompts in production",    body: "Compare prompts, models, and configs side-by-side with statistical rigor. Know what actually works.",               icon: IcoFlask  },
+  { kicker: "Alert",      title: "Slack the right person, fast",      body: "Real-time alerts when agents spike errors or drift. Know about issues before users report them.",                    icon: IcoSlack  },
+];
+
+const TESTIMONIALS = [
+  { quote: "Dottle caught a silent regression in our refund agent that ran for three days before anyone noticed. It paid for itself the first week.", name: "Priya Raman",  title: "Staff Eng, Northpike"  },
+  { quote: "We replaced three dashboards and a cron job with one dottle install. Our on-call pages dropped 60%.",                                     name: "Marcus Ade",   title: "Platform Lead, Lumen"  },
+  { quote: "Finally, a tool that tells us what broke instead of showing us a wall of JSON. The root cause suggestions are scary-accurate.",           name: "Jules Corbin", title: "Head of AI, Harbor"    },
+];
+
+const PLANS = [
+  { name: "Hobby",      price: "Free",   tag: "For solo builders",    feats: ["10k traces/mo", "3-day retention", "Community Slack", "Core detections"],                        featured: false },
+  { name: "Team",       price: "$199",   tag: "Per project / month",  feats: ["1M traces/mo", "30-day retention", "Slack + PagerDuty alerts", "A/B prompt testing", "RBAC"],   featured: true  },
+  { name: "Enterprise", price: "Custom", tag: "Talk to us",           feats: ["Unlimited volume", "Self-hosted option", "SAML + SCIM", "Dedicated support", "Custom detections"], featured: false },
+];
+
+const FOOTER_COLS = [
+  { h: "Product",    items: ["Overview", "Tracing", "Alerts", "A/B testing", "Changelog"]               },
+  { h: "Developers", items: ["Documentation", "Python SDK", "TypeScript SDK", "API reference", "Status"]  },
+  { h: "Company",    items: ["About", "Customers", "Careers", "Blog", "Contact"]                         },
+  { h: "Legal",      items: ["Privacy", "Terms", "Security", "SOC 2", "DPA"]                             },
+];
+
+const AGENT_CODE = `from dottle import Dottle
+from openai import OpenAI
+
+dottle = Dottle(project="support-agent")
+
+@dottle.trace
+def run_agent(user_msg: str):
+    # Dottle auto-captures every tool call,
+    # LLM response, and control flow decision
+    return agent.invoke(user_msg)
+
+# That's it. Drift, loops, and silent
+# failures are flagged automatically.`;
+
+// ─── Shared primitives ─────────────────────────────────────────────────────────
+function Wordmark({ size = 22, color = FG }: { size?: number; color?: string }) {
+  return (
+    <span style={{ display: "inline-flex", alignItems: "baseline", fontFamily: "var(--font-display)", fontWeight: 500, fontSize: size, letterSpacing: "-0.02em", color, lineHeight: 1, transition: "color 400ms ease" }}>
+      dottle<span style={{ color: A, fontWeight: 700 }}>.</span><span style={{ opacity: 0.5, fontWeight: 400 }}>dev</span>
+    </span>
+  );
+}
+
+type BtnVariant = "primary" | "ghost" | "subtle";
+function Btn({ children, variant = "primary", style, href, ...props }: { children: React.ReactNode; variant?: BtnVariant; style?: React.CSSProperties; href?: string; onClick?: () => void; type?: "button" | "submit" }) {
+  const base: React.CSSProperties = {
+    display: "inline-flex", alignItems: "center", gap: 8, padding: "10px 16px", borderRadius: 8,
+    fontFamily: "var(--font-sans)", fontSize: 14, fontWeight: 500, letterSpacing: "-0.005em",
+    cursor: "pointer", border: "1px solid transparent", transition: "all 160ms ease", background: "transparent",
+    textDecoration: "none",
+  };
+  const v: Record<BtnVariant, React.CSSProperties> = {
+    primary: { background: A, color: "#fff", border: `1px solid ${A}` },
+    ghost:   { background: "transparent", color: FG, border: `1px solid ${LINE}` },
+    subtle:  { background: "transparent", color: MUTED, border: "1px solid transparent" },
+  };
+  const combined = { ...base, ...v[variant], ...style };
+  if (href) return <a href={href} target="_blank" rel="noopener noreferrer" style={combined}>{children}</a>;
+  return <button {...props} style={combined}>{children}</button>;
+}
+
+function SectionLabel({ children, dark = false }: { children: React.ReactNode; dark?: boolean }) {
+  return (
+    <div style={{ fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", color: dark ? "rgba(255,255,255,0.45)" : "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", gap: 8 }}>
+      <span style={{ width: 6, height: 6, borderRadius: 99, background: A, display: "inline-block", flexShrink: 0 }} />
+      {children}
+    </div>
+  );
+}
+
+function CodeBlock({ code }: { code: string }) {
+  const lines = code.trim().split("\n");
+  function hi(line: string) {
+    const parts: { t: string; m: string }[] = [];
+    const p = line
+      .replace(/(#[^\n]*)/g, "\u0001$1\u0002")
+      .replace(/("(?:[^"\\]|\\.)*")/g, "\u0003$1\u0004")
+      .replace(/\b(import|from|def|return|await|async|as|class|if|else|with|for|in)\b/g, "\u0005$1\u0006");
+    let buf = "", mode = "text";
+    for (const ch of p) {
+      if (ch === "\u0001") { if (buf) parts.push({ t: buf, m: mode }); buf = ""; mode = "c"; continue; }
+      if (ch === "\u0002") { if (buf) parts.push({ t: buf, m: mode }); buf = ""; mode = "text"; continue; }
+      if (ch === "\u0003") { if (buf) parts.push({ t: buf, m: mode }); buf = ""; mode = "s"; continue; }
+      if (ch === "\u0004") { if (buf) parts.push({ t: buf, m: mode }); buf = ""; mode = "text"; continue; }
+      if (ch === "\u0005") { if (buf) parts.push({ t: buf, m: mode }); buf = ""; mode = "k"; continue; }
+      if (ch === "\u0006") { if (buf) parts.push({ t: buf, m: mode }); buf = ""; mode = "text"; continue; }
+      buf += ch;
+    }
+    if (buf) parts.push({ t: buf, m: mode });
+    return parts;
+  }
+  const col = (m: string) => m === "c" ? "#6b7280" : m === "s" ? "#0f5132" : m === "k" ? "#6d28d9" : "inherit";
+  return (
+    <pre style={{ margin: 0, padding: "18px 20px", background: "rgba(0,0,0,0.035)", border: `1px solid rgba(0,0,0,0.07)`, borderRadius: 10, fontFamily: "var(--font-mono)", fontSize: 13, lineHeight: 1.7, color: FG, overflow: "auto" }}>
+      {lines.map((line, i) => (
+        <div key={i} style={{ display: "flex" }}>
+          <span style={{ display: "inline-block", width: 24, opacity: 0.35, userSelect: "none", flexShrink: 0 }}>{i + 1}</span>
+          <span>{hi(line).map((r, k) => <span key={k} style={{ color: col(r.m), fontStyle: r.m === "c" ? "italic" : "normal" }}>{r.t}</span>)}</span>
+        </div>
+      ))}
+    </pre>
+  );
+}
+
+// ─── Alert visual panels ───────────────────────────────────────────────────────
+const cardWrap: React.CSSProperties = {
+  background: "#051e2c", border: "1px solid rgba(255,255,255,0.09)", borderRadius: 12,
+  overflow: "hidden", fontFamily: "var(--font-mono)", fontSize: 12, color: "#e8e4dd",
+  height: "100%", display: "flex", flexDirection: "column",
+};
+const cardHdr: React.CSSProperties = {
+  padding: "10px 16px", borderBottom: "1px solid rgba(255,255,255,0.07)",
+  display: "flex", alignItems: "center", gap: 8, fontSize: 11,
+  color: "rgba(255,255,255,0.38)", letterSpacing: "0.07em", textTransform: "uppercase",
+};
+
+function VisualComplaint() {
+  return (
+    <div style={cardWrap}>
+      <div style={cardHdr}><span style={{ width: 6, height: 6, borderRadius: 99, background: A, display: "inline-block" }} />Dottle · alert dashboard</div>
+      <div style={{ padding: "14px 16px", display: "grid", gap: 10, flex: 1 }}>
+        {[
+          { level: 1, agent: "billing.refund", msg: '"This app never works properly"', who: "user_id: u_8291 · 2m ago" },
+          { level: 0.5, agent: "support.triage", msg: '"Got a completely wrong answer again"', who: "user_id: u_1144 · 4m ago" },
+        ].map((r, i) => (
+          <div key={i} style={{ padding: "11px 13px", background: `rgba(217,119,87,${r.level * 0.1})`, borderLeft: `2px solid rgba(217,119,87,${r.level * 0.8})`, borderRadius: "0 6px 6px 0" }}>
+            <div style={{ color: `rgba(217,119,87,${0.6 + r.level * 0.4})`, fontSize: 10, marginBottom: 4, letterSpacing: "0.05em" }}>COMPLAINT · {r.agent}</div>
+            <div style={{ color: "#e8e4dd", fontSize: 13, marginBottom: 4 }}>{r.msg}</div>
+            <div style={{ color: "rgba(255,255,255,0.35)", fontSize: 11 }}>{r.who}</div>
+          </div>
+        ))}
+        <div style={{ display: "flex", justifyContent: "space-between", color: "rgba(255,255,255,0.35)", fontSize: 11, paddingTop: 4 }}>
+          <span>↑ 340% complaint rate in 10m</span>
+          <span style={{ color: A }}>→ Slack alerted</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function VisualSilentFail() {
+  const rows = [
+    { n: "01", label: "Input received",      bad: false },
+    { n: "02", label: "Context retrieved",    bad: false },
+    { n: "03", label: "fetch_product()",      bad: true  },
+    { n: "04", label: "LLM call",             bad: false },
+    { n: "05", label: "Response sent",        bad: false },
+  ];
+  return (
+    <div style={cardWrap}>
+      <div style={cardHdr}>
+        <span style={{ width: 6, height: 6, borderRadius: 99, background: "#4ade80", display: "inline-block" }} />
+        run_id=18292 · status=ok
+        <span style={{ marginLeft: "auto", color: A }}>silent failure ↗</span>
+      </div>
+      <div style={{ padding: "14px 16px", display: "grid", gap: 8, flex: 1 }}>
+        {rows.map(r => (
+          <div key={r.n} style={{ display: "flex", gap: 12, alignItems: "center" }}>
+            <span style={{ color: "rgba(255,255,255,0.25)", width: 20 }}>{r.n}</span>
+            <span style={{ flex: 1, color: r.bad ? A : "rgba(255,255,255,0.6)" }}>{r.label}</span>
+            <span style={{ color: "#4ade80", fontSize: 11 }}>OK</span>
+          </div>
+        ))}
+      </div>
+      <div style={{ margin: "0 16px 14px", padding: "10px 12px", background: "rgba(217,119,87,0.1)", borderRadius: 6, border: `1px solid rgba(217,119,87,0.18)` }}>
+        <div style={{ color: A, fontSize: 10, marginBottom: 4, letterSpacing: "0.05em" }}>DOTTLE DETECTED</div>
+        <div style={{ color: "rgba(255,255,255,0.7)", fontSize: 12, lineHeight: 1.5 }}>fetch_product() returned null · result passed as empty context · user received hallucinated response</div>
+      </div>
+    </div>
+  );
+}
+
+function VisualToolFail() {
+  const tools = [
+    { name: "search_crm",   rate: 17, bad: true  },
+    { name: "fetch_product", rate: 8,  bad: false },
+    { name: "send_email",    rate: 0,  bad: false },
+    { name: "query_db",      rate: 2,  bad: false },
+  ];
+  return (
+    <div style={cardWrap}>
+      <div style={cardHdr}><span style={{ width: 6, height: 6, borderRadius: 99, background: A, display: "inline-block" }} />Tool health · last 5 min</div>
+      <div style={{ padding: "14px 16px", flex: 1 }}>
+        {tools.map(t => (
+          <div key={t.name} style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
+            <span style={{ flex: 1, color: t.bad ? A : "rgba(255,255,255,0.65)" }}>{t.name}</span>
+            <div style={{ width: 100, height: 5, background: "rgba(255,255,255,0.07)", borderRadius: 99, overflow: "hidden" }}>
+              <div style={{ width: `${Math.min(t.rate * 5, 100)}%`, height: "100%", background: t.rate > 10 ? A : t.rate > 4 ? "#fbbf24" : "#4ade80", borderRadius: 99 }} />
+            </div>
+            <span style={{ color: t.bad ? A : "rgba(255,255,255,0.4)", width: 36, textAlign: "right", fontSize: 11 }}>{t.rate}%</span>
+          </div>
+        ))}
+        <div style={{ marginTop: 4, padding: "8px 10px", background: "rgba(217,119,87,0.1)", borderRadius: 6, color: A, fontSize: 11 }}>
+          search_crm timeout rate is 17% — 5× above baseline
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function VisualRefuses() {
+  return (
+    <div style={cardWrap}>
+      <div style={cardHdr}><span style={{ width: 6, height: 6, borderRadius: 99, background: A, display: "inline-block" }} />run_id=19041 · refusal detected</div>
+      <div style={{ padding: "14px 16px", display: "grid", gap: 10, flex: 1 }}>
+        <div style={{ padding: "10px 12px", background: "rgba(255,255,255,0.04)", borderRadius: 6 }}>
+          <div style={{ color: "rgba(255,255,255,0.3)", fontSize: 10, marginBottom: 4 }}>USER</div>
+          <div style={{ color: "rgba(255,255,255,0.8)", fontSize: 13 }}>Process this refund for order #18291</div>
+        </div>
+        <div style={{ padding: "10px 12px", background: "rgba(217,119,87,0.08)", borderRadius: 6, borderLeft: `2px solid ${A}` }}>
+          <div style={{ color: A, fontSize: 10, marginBottom: 4 }}>AGENT</div>
+          <div style={{ color: "rgba(255,255,255,0.7)", fontSize: 13, lineHeight: 1.5 }}>{"I'm sorry, I can't process refunds directly. Please contact support at..."}</div>
+        </div>
+        <div style={{ padding: "8px 10px", background: "rgba(217,119,87,0.1)", borderRadius: 6, color: A, fontSize: 11 }}>
+          Refusal rate ↑ 12% in last 30 min · prompt drift detected
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function VisualModelRegression() {
+  const cols = [
+    { label: "gpt-4o",  vals: ["98.2%", "1.2s", "$0.004"], bad: false },
+    { label: "gpt-4.1", vals: ["91.4%", "2.8s", "$0.011"], bad: true  },
+  ];
+  const metrics = ["success rate", "p50 latency", "cost / run"];
+  return (
+    <div style={cardWrap}>
+      <div style={cardHdr}><span style={{ width: 6, height: 6, borderRadius: 99, background: A, display: "inline-block" }} />A/B model comparison · production</div>
+      <div style={{ padding: "14px 16px", flex: 1 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 1, background: "rgba(255,255,255,0.06)", borderRadius: 8, overflow: "hidden", marginBottom: 12 }}>
+          <div style={{ padding: "8px 10px", background: "#041620" }} />
+          {cols.map((c, ci) => (
+            <div key={ci} style={{ padding: "8px 10px", background: c.bad ? "rgba(217,119,87,0.07)" : "#07202e", color: c.bad ? A : "rgba(255,255,255,0.7)", fontSize: 12, fontWeight: 500 }}>
+              {c.label}
+            </div>
+          ))}
+          {metrics.map((m, mi) => (
+            <>
+              <div key={`m${mi}`} style={{ padding: "8px 10px", background: "#041620", color: "rgba(255,255,255,0.35)", fontSize: 11 }}>{m}</div>
+              {cols.map((c, ci) => (
+                <div key={`v${mi}${ci}`} style={{ padding: "8px 10px", background: c.bad ? "rgba(217,119,87,0.05)" : "#061e2b", color: c.bad && mi === 0 ? A : "rgba(255,255,255,0.75)", fontSize: 12 }}>
+                  {c.vals[mi]}
+                </div>
+              ))}
+            </>
+          ))}
+        </div>
+        <div style={{ color: A, fontSize: 11 }}>→ Regression detected: −6.8pp success rate · auto-rollback triggered</div>
+      </div>
+    </div>
+  );
+}
+
+function VisualAbnormalTrajectory() {
+  const runs = [
+    { id: "run_18291", steps: 47, bad: true  },
+    { id: "run_18290", steps:  9, bad: false },
+    { id: "run_18289", steps:  7, bad: false },
+    { id: "run_18288", steps:  8, bad: false },
+  ];
+  return (
+    <div style={cardWrap}>
+      <div style={cardHdr}><span style={{ width: 6, height: 6, borderRadius: 99, background: A, display: "inline-block" }} />Trajectory · sales.qualifier</div>
+      <div style={{ padding: "14px 16px", flex: 1 }}>
+        {runs.map(r => (
+          <div key={r.id} style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 10 }}>
+            <span style={{ color: "rgba(255,255,255,0.3)", fontSize: 11, width: 76 }}>{r.id}</span>
+            <div style={{ flex: 1, height: 8, background: "rgba(255,255,255,0.05)", borderRadius: 99, overflow: "hidden" }}>
+              <div style={{ width: `${Math.min((r.steps / 50) * 100, 100)}%`, height: "100%", background: r.bad ? A : "rgba(255,255,255,0.25)", borderRadius: 99, transition: "width 0.6s ease" }} />
+            </div>
+            <span style={{ color: r.bad ? A : "rgba(255,255,255,0.45)", fontSize: 12, width: 52, textAlign: "right" }}>{r.steps} steps</span>
+          </div>
+        ))}
+        <div style={{ marginTop: 6, padding: "8px 10px", background: "rgba(217,119,87,0.1)", borderRadius: 6, color: A, fontSize: 11 }}>
+          run_18291 took 47 steps · avg is 8 · infinite loop detected
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function VisualLatency() {
+  const bars = [12, 15, 14, 18, 13, 16, 19, 24, 38, 72, 91, 84, 46, 28, 17];
+  const max = Math.max(...bars);
+  return (
+    <div style={cardWrap}>
+      <div style={cardHdr}><span style={{ width: 6, height: 6, borderRadius: 99, background: A, display: "inline-block" }} />Latency · p95 · last 15 min</div>
+      <div style={{ padding: "14px 16px", flex: 1 }}>
+        <div style={{ display: "flex", alignItems: "flex-end", gap: 3, height: 72 }}>
+          {bars.map((b, i) => (
+            <div key={i} style={{ flex: 1, height: `${(b / max) * 100}%`, background: b > 40 ? A : "rgba(255,255,255,0.18)", borderRadius: "2px 2px 0 0" }} />
+          ))}
+        </div>
+        <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, color: "rgba(255,255,255,0.25)", marginTop: 5 }}>
+          <span>15m ago</span><span>now</span>
+        </div>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8, marginTop: 12 }}>
+          {([["p50", "1.2s", false], ["p95", "9.1s", true], ["SLA", "3.0s", false]] as [string, string, boolean][]).map(([k, v, bad]) => (
+            <div key={k} style={{ padding: "8px 10px", background: bad ? "rgba(217,119,87,0.1)" : "rgba(255,255,255,0.04)", borderRadius: 6, textAlign: "center" }}>
+              <div style={{ color: "rgba(255,255,255,0.35)", fontSize: 10 }}>{k}</div>
+              <div style={{ color: bad ? A : "#e8e4dd", fontSize: 15, marginTop: 3 }}>{v}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function VisualCostSpike() {
+  const tenants = [
+    { id: "acme-corp",  cost: "$0.12", pct: 3,   bad: false },
+    { id: "harbor-ai",  cost: "$4.80", pct: 100,  bad: true  },
+    { id: "northpike",  cost: "$0.09", pct: 2,   bad: false },
+    { id: "stackline",  cost: "$0.15", pct: 4,   bad: false },
+  ];
+  return (
+    <div style={cardWrap}>
+      <div style={cardHdr}><span style={{ width: 6, height: 6, borderRadius: 99, background: A, display: "inline-block" }} />Cost anomaly · per tenant · last hour</div>
+      <div style={{ padding: "14px 16px", flex: 1 }}>
+        {tenants.map(t => (
+          <div key={t.id} style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 10, padding: t.bad ? "8px 10px" : "3px 0", background: t.bad ? "rgba(217,119,87,0.08)" : "transparent", borderRadius: t.bad ? 6 : 0, borderLeft: t.bad ? `2px solid ${A}` : "none", paddingLeft: t.bad ? 10 : 0 }}>
+            <span style={{ flex: 1, color: t.bad ? A : "rgba(255,255,255,0.55)", fontSize: 12 }}>{t.id}</span>
+            <div style={{ width: 80, height: 5, background: "rgba(255,255,255,0.05)", borderRadius: 99, overflow: "hidden" }}>
+              <div style={{ width: `${t.pct}%`, height: "100%", background: t.bad ? A : "rgba(255,255,255,0.2)", borderRadius: 99 }} />
+            </div>
+            <span style={{ color: t.bad ? A : "rgba(255,255,255,0.4)", fontSize: 12, width: 44, textAlign: "right" }}>{t.cost}</span>
+          </div>
+        ))}
+        <div style={{ marginTop: 6, padding: "8px 10px", background: "rgba(217,119,87,0.1)", borderRadius: 6, color: A, fontSize: 11 }}>
+          harbor-ai is spending 40× their usual budget · loop suspected
+        </div>
+      </div>
+    </div>
+  );
+}
+
+const VISUALS = [
+  VisualComplaint, VisualSilentFail, VisualToolFail, VisualRefuses,
+  VisualModelRegression, VisualAbnormalTrajectory, VisualLatency, VisualCostSpike,
+];
+
+// ─── Nav ───────────────────────────────────────────────────────────────────────
+function Nav({ dark = false }: { dark?: boolean }) {
+  const isMobile = useWindowWidth() < 768;
+  return (
+    <nav style={{
+      position: "sticky", top: 0, zIndex: 20,
+      background: dark ? "rgba(8,42,58,0.92)" : "rgba(250,250,249,0.8)",
+      backdropFilter: "saturate(180%) blur(10px)", WebkitBackdropFilter: "saturate(180%) blur(10px)",
+      borderBottom: dark ? "1px solid rgba(255,255,255,0.08)" : `1px solid ${LINE}`,
+      transition: "background 400ms ease, border-color 400ms ease",
+    }}>
+      <div style={{ maxWidth: 1200, margin: "0 auto", padding: isMobile ? "14px 20px" : "14px 32px", display: "flex", alignItems: "center", gap: 24 }}>
+        <Wordmark color={dark ? DFG : FG} />
+        {!isMobile && (
+          <div style={{ display: "flex", gap: 24, fontSize: 13.5, color: dark ? "rgba(250,250,249,0.6)" : MUTED, transition: "color 400ms ease" }}>
+            {([
+              { label: "Product",   href: "#features" },
+              { label: "Docs",      href: "/docs" },
+              { label: "Pricing",   href: "#pricing" },
+              { label: "Changelog", href: "#" },
+              { label: "Customers", href: "#" },
+            ] as { label: string; href: string }[]).map(({ label, href }) => (
+              <Link key={label} href={href} style={{ cursor: "pointer", color: "inherit", textDecoration: "none" }}>{label}</Link>
+            ))}
+          </div>
+        )}
+        <div style={{ marginLeft: "auto", display: "flex", gap: 8, alignItems: "center" }}>
+          {!isMobile && <Btn variant="subtle" href={LOGIN} style={dark ? { color: "rgba(250,250,249,0.7)" } : {}}>Sign in</Btn>}
+          <Btn variant="primary" href={REGISTER} style={isMobile ? { padding: "8px 14px", fontSize: 13 } : {}}>Start free</Btn>
         </div>
       </div>
     </nav>
   );
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// FAILURE CARD (Hero right side)
-// ─────────────────────────────────────────────────────────────────────────────
-
-function FailureCard() {
+// ─── Hero ──────────────────────────────────────────────────────────────────────
+function Hero() {
+  const w = useWindowWidth();
+  const isMobile = w < 768;
   return (
-    <div className="relative w-full max-w-[400px]">
-      <div className="rounded-2xl border border-[#1F2937] bg-[#080C10] overflow-hidden shadow-xl shadow-black/40 terminal">
-        {/* Titlebar */}
-        <div className="flex items-center gap-1.5 px-4 py-3 bg-[#0B0F14] border-b border-[#1F2937]">
-          <span className="w-2.5 h-2.5 rounded-full bg-[#EF444460]" />
-          <span className="w-2.5 h-2.5 rounded-full bg-[#F59E0B60]" />
-          <span className="w-2.5 h-2.5 rounded-full bg-[#22C55E60]" />
-          <span className="ml-3 text-[11px] text-[#374151] font-mono">
-            dottle · run monitor
-          </span>
-          <span className="ml-auto flex items-center gap-1.5 text-[11px] text-[#4F6F52]">
-            <span className="live-dot w-1.5 h-1.5 rounded-full bg-[#4F6F52] inline-block" />
-            live
-          </span>
+    <section style={{ maxWidth: 1200, margin: "0 auto", padding: isMobile ? "64px 20px 56px" : "120px 32px 96px" }}>
+      <div style={{ maxWidth: 900, margin: "0 auto", textAlign: "center" }}>
+        <div style={{ display: "inline-flex", alignItems: "center", gap: 10, padding: "6px 12px", borderRadius: 99, border: `1px solid ${LINE}`, background: PANEL, fontSize: 12, fontFamily: "var(--font-mono)", color: MUTED }}>
+          <span style={{ width: 6, height: 6, borderRadius: 99, background: A, display: "inline-block" }} />
+          v0.8 — open beta, SOC 2 in progress
         </div>
-
-        {/* Run ID */}
-        <div className="px-5 pt-4 pb-3 flex items-center justify-between border-b border-[#1F2937]">
-          <div>
-            <p className="text-[10px] text-[#374151] font-mono uppercase tracking-wider mb-0.5">
-              run_id
-            </p>
-            <p className="text-[#E5E7EB] font-mono font-semibold text-lg">
-              #18291
-            </p>
-          </div>
-          <span className="flex items-center gap-1.5 text-[#EF4444] bg-[#EF444412] border border-[#EF444422] px-3 py-1.5 rounded-lg text-xs font-medium">
-            <XCircle size={12} />
-            Failed
-          </span>
+        <h1 style={{ fontFamily: "var(--font-display)", fontSize: "clamp(40px, 7vw, 96px)", lineHeight: 1.0, letterSpacing: "-0.04em", fontWeight: 500, margin: "24px 0 20px", color: FG }}>
+          Production monitoring for AI agents.
+        </h1>
+        <p style={{ fontSize: isMobile ? 16 : 21, lineHeight: 1.5, color: MUTED, maxWidth: 640, margin: "0 auto", letterSpacing: "-0.005em" }}>
+          Catch agent drift before your users do. Detect silent regressions across every session, tool call, and LLM interaction — without writing a single threshold.
+        </p>
+        <div style={{ display: "flex", gap: 12, marginTop: 36, justifyContent: "center", flexWrap: "wrap" }}>
+          <Btn variant="primary" href={REGISTER}>Start free <IcoArrow /></Btn>
+          <Btn variant="ghost" href={CAL}>Book a Demo</Btn>
         </div>
-
-        {/* Failure summary */}
-        <div className="mx-4 mt-4 rounded-xl bg-[#EF444410] border border-[#EF444420] p-3.5">
-          <div className="flex items-center gap-2 mb-2.5">
-            <AlertTriangle size={13} className="text-[#EF4444] shrink-0" />
-            <span className="text-[#EF4444] text-[11px] font-semibold uppercase tracking-widest">
-              Infinite loop detected
-            </span>
-          </div>
-          <div className="space-y-1 font-mono text-xs">
-            <p className="text-[#9CA3AF]">
-              <span className="text-[#4B5563]">→</span>{" "}
-              <span className="text-[#FCA5A5]">43 repeated tool calls</span>
-            </p>
-            <p className="text-[#9CA3AF]">
-              <span className="text-[#4B5563]">→</span> tokens burned:{" "}
-              <span className="text-[#FCA5A5]">14,200</span>
-            </p>
-            <p className="text-[#9CA3AF]">
-              <span className="text-[#4B5563]">→</span> cost wasted:{" "}
-              <span className="text-[#FCA5A5] font-semibold">$12.40</span>
-            </p>
-          </div>
-        </div>
-
-        {/* Steps */}
-        <div className="px-5 py-4 space-y-2">
-          {[
-            { n: 1, label: "Input received",             ok: true  },
-            { n: 2, label: "Context retrieved",          ok: true  },
-            { n: 3, label: "LLM call → tool selected",   ok: true  },
-            { n: 4, label: "Tool timeout (no backoff)",  ok: false },
-            { n: 5, label: "Retry loop × 43",            ok: false },
-          ].map(({ n, label, ok }) => (
-            <div key={n} className="flex items-center gap-2.5 font-mono text-xs">
-              {ok
-                ? <CheckCircle2 size={13} className="text-[#4F6F52] shrink-0" />
-                : <XCircle     size={13} className="text-[#EF4444] shrink-0" />}
-              <span className="text-[#374151]">Step {n}:</span>
-              <span className={ok ? "text-[#6B7280]" : "text-[#FCA5A5]"}>{label}</span>
-            </div>
-          ))}
-        </div>
-
-        {/* Root cause */}
-        <div className="mx-4 mb-4 rounded-xl border border-[#4F6F5225] bg-[#4F6F520C] p-3.5">
-          <p className="text-[10px] text-[#6B8F6E] font-semibold uppercase tracking-widest mb-2">
-            Root cause — Dottle
-          </p>
-          <p className="text-[#9CA3AF] text-xs font-mono leading-[1.6]">
-            <span className="text-[#86EFAC]">max_retries</span>=0 · no backoff
-            strategy set.
-            <br />
-            Retry triggers on every tool failure indefinitely.
-          </p>
-          <p className="text-[#6B8F6E] text-xs mt-2 font-mono">
-            → set max_retries ≥ 3 + exponential backoff
-          </p>
-        </div>
-
-        {/* Footer meta */}
-        <div className="px-5 py-3 border-t border-[#1F2937] flex items-center gap-4 text-[11px] font-mono text-[#374151]">
-          <span>47.3s</span>
-          <span>gpt-4o</span>
-          <span className="ml-auto text-[#EF4444]">→ Slack alerted</span>
+        <div style={{ marginTop: 28, fontFamily: "var(--font-mono)", fontSize: 12, color: MUTED, display: "flex", gap: isMobile ? 8 : 16, flexWrap: "wrap", justifyContent: "center" }}>
+          <span>$ pip install dottle</span>
+          {!isMobile && <span style={{ opacity: 0.5 }}>·</span>}
+          <span>2 lines to instrument</span>
+          {!isMobile && <span style={{ opacity: 0.5 }}>·</span>}
+          <span>Works with any framework</span>
         </div>
       </div>
-    </div>
-  );
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// HERO
-// ─────────────────────────────────────────────────────────────────────────────
-
-function Hero() {
-  return (
-    <section className="relative pt-28 pb-20 px-6 overflow-hidden">
-      <div className="grid-bg absolute inset-0 opacity-70" />
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-[#4F6F52] opacity-[0.06] rounded-full blur-[100px] pointer-events-none" />
-
-      <div className="relative max-w-6xl mx-auto">
-        <div className="grid lg:grid-cols-[1fr_420px] gap-14 items-center">
-          {/* Copy */}
-          <div>
-            <div className="inline-flex items-center gap-2 bg-[#4F6F5212] border border-[#4F6F5228] text-[#6B8F6E] text-xs px-3.5 py-1.5 rounded-full mb-7 font-medium">
-              <Activity size={11} />
-              Active failure detection · not just observability
-            </div>
-
-            <h1 className="text-[2.75rem] sm:text-[3.25rem] font-semibold leading-[1.08] tracking-[-0.02em] text-white mb-5">
-              Your AI agent is{" "}
-              <span className="text-[#EF4444]">breaking.</span>
-              <br />
-              You just don&apos;t see it.
-            </h1>
-
-            <p className="text-[1.05rem] text-[#6B7280] leading-[1.75] mb-9 max-w-[500px]">
-              Dottle detects failures, explains why they happen, and helps you
-              fix them{" "}
-              <span className="text-[#9CA3AF]">
-                before your users complain.
-              </span>
-            </p>
-
-            <div className="flex flex-col sm:flex-row gap-3 mb-5">
-              <a
-                href="#cta"
-                className="glow-btn flex items-center justify-center gap-2 bg-[#4F6F52] hover:bg-[#3D5940] text-white font-medium px-6 py-3 rounded-xl transition-colors text-[15px]"
-              >
-                Get your agent monitored (free)
-                <ArrowRight size={15} />
-              </a>
-              <a
-                href="#how"
-                className="flex items-center justify-center gap-2 border border-[#1F2937] hover:border-[#2D3748] text-[#6B7280] hover:text-[#9CA3AF] px-6 py-3 rounded-xl transition-colors text-[15px]"
-              >
-                See how it works
-              </a>
-            </div>
-
-            <p className="text-xs text-[#374151]">
-              No dashboards to configure. We set everything up for you.
-            </p>
-          </div>
-
-          {/* Card */}
-          <div className="flex justify-center lg:justify-end">
-            <FailureCard />
-          </div>
-        </div>
+      <div style={{ marginTop: isMobile ? 56 : 96, paddingTop: 32, borderTop: `1px solid ${LINE}`, display: "flex", alignItems: "center", gap: isMobile ? 16 : 48, flexWrap: "wrap", justifyContent: isMobile ? "center" : undefined, fontFamily: "var(--font-mono)", fontSize: 11, color: MUTED, letterSpacing: "0.1em", textTransform: "uppercase" }}>
+        <span style={{ width: isMobile ? "100%" : undefined, textAlign: isMobile ? "center" : undefined }}>Trusted by teams shipping agents at</span>
+        {["NORTHPIKE", "Lumen/AI", "HARBOR", "axiom.so", "Meridian", "stackline"].map(n => (
+          <span key={n} style={{ fontSize: 15, letterSpacing: "-0.01em", color: FG, opacity: 0.7, fontFamily: "var(--font-display)", textTransform: "none" }}>{n}</span>
+        ))}
       </div>
     </section>
   );
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// TRUST STRIP
-// ─────────────────────────────────────────────────────────────────────────────
-
-function TrustStrip() {
+// ─── Features ──────────────────────────────────────────────────────────────────
+function Features() {
+  const w = useWindowWidth();
+  const cols = w < 640 ? "1fr" : w < 1024 ? "repeat(2, 1fr)" : "repeat(3, 1fr)";
   return (
-    <div className="border-t border-b border-[#1F2937] py-4 px-6">
-      <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-8">
-        <span className="text-[11px] text-[#374151] uppercase tracking-widest shrink-0">
-          Works with
-        </span>
-        <div className="flex flex-wrap justify-center gap-x-7 gap-y-2">
-          {["LangChain", "OpenAI Agents SDK", "CrewAI", "AutoGen", "LlamaIndex", "Custom agents"].map(
-            (s) => (
-              <span key={s} className="text-[13px] text-[#4B5563] font-medium">
-                {s}
-              </span>
-            )
-          )}
-        </div>
+    <section id="features" style={{ maxWidth: 1200, margin: "0 auto", padding: w < 768 ? "56px 20px" : "80px 32px" }}>
+      <div style={{ maxWidth: 680, marginBottom: 48 }}>
+        <SectionLabel>Why dottle</SectionLabel>
+        <h2 style={{ fontFamily: "var(--font-display)", fontSize: "clamp(28px, 3.6vw, 48px)", lineHeight: 1.08, letterSpacing: "-0.03em", fontWeight: 500, margin: "16px 0 12px" }}>
+          We don&rsquo;t just show logs. We tell you what broke.
+        </h2>
+        <p style={{ fontSize: 16, color: MUTED, lineHeight: 1.5, margin: 0 }}>
+          Other tools give you observability — a passive stream of data you still have to interpret. Dottle does the analysis for you.
+        </p>
       </div>
-    </div>
+      <div style={{ display: "grid", gridTemplateColumns: cols, gap: 1, background: LINE, border: `1px solid ${LINE}`, borderRadius: 14, overflow: "hidden" }}>
+        {FEATURES.map(f => (
+          <div key={f.title} style={{ background: PANEL, padding: 24, minHeight: 200 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, color: A }}>
+              <f.icon />
+              <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase" }}>{f.kicker}</span>
+            </div>
+            <div style={{ fontFamily: "var(--font-display)", fontSize: 20, fontWeight: 500, letterSpacing: "-0.015em", margin: "14px 0 10px", lineHeight: 1.25 }}>{f.title}</div>
+            <div style={{ color: MUTED, fontSize: 14.5, lineHeight: 1.55 }}>{f.body}</div>
+          </div>
+        ))}
+      </div>
+    </section>
   );
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// SCROLL-DRIVEN STICKY SECTION
-// ─────────────────────────────────────────────────────────────────────────────
-
-type StepLog = {
-  time: string;
-  level: "info" | "warn" | "error" | "cmd" | "comment";
-  text: string;
-};
-
-type Step = {
-  id: number;
-  label: string;
-  description: string;
-  logs: StepLog[];
-  highlight: string; // bottom annotation
-};
-
-const STEPS: Step[] = [
-  {
-    id: 0,
-    label: "Infinite loops draining tokens",
-    description:
-      "Your agent retries forever. No exit condition, no backoff. 43 tool calls, $12 wasted. You find out from your invoice.",
-    highlight: "43 tool calls · $12.40 burned · nobody was alerted",
-    logs: [
-      { time: "12:04:01", level: "info",    text: "run_id=18291  agent started" },
-      { time: "12:04:03", level: "info",    text: "step=1  context retrieved → ok" },
-      { time: "12:04:04", level: "warn",    text: "step=2  tool: search_db → failed (timeout)" },
-      { time: "12:04:05", level: "warn",    text: "step=3  retry 1 → failed (timeout)" },
-      { time: "12:04:06", level: "warn",    text: "step=4  retry 2 → failed (timeout)" },
-      { time: "12:04:08", level: "warn",    text: "step=5  retry 3 → failed (timeout)" },
-      { time: "12:04:12", level: "warn",    text: "step=6  retry 4 → failed (timeout)" },
-      { time: "—",        level: "comment", text: "... 37 more identical retries ..." },
-      { time: "12:04:47", level: "error",   text: "step=43  retry 41 → failed (timeout)" },
-      { time: "12:04:47", level: "error",   text: "max call depth exceeded · exit code 1" },
-    ],
-  },
-  {
-    id: 1,
-    label: "Tool failures without visibility",
-    description:
-      "A tool call fails silently. Your agent continues with an empty result. The user gets a broken experience and you never know.",
-    highlight: "status=ok logged · user got broken output · no alert fired",
-    logs: [
-      { time: "12:04:01", level: "info",    text: "run_id=18292  agent started" },
-      { time: "12:04:03", level: "info",    text: "step=1  input parsed → ok" },
-      { time: "12:04:04", level: "info",    text: "step=2  calling external API: fetch_product()" },
-      { time: "12:04:09", level: "error",   text: "fetch_product()  timeout after 5000ms" },
-      { time: "12:04:09", level: "warn",    text: "no retry configured · continuing with result=null" },
-      { time: "12:04:10", level: "info",    text: "step=3  LLM called with result=null" },
-      { time: "12:04:11", level: "info",    text: "step=4  response generated" },
-      { time: "12:04:11", level: "info",    text: "run completed · status=ok" },
-      { time: "—",        level: "comment", text: "← 'ok' — but user received empty response" },
-    ],
-  },
-  {
-    id: 2,
-    label: "Wrong outputs reaching users",
-    description:
-      "No output validation. The agent returns a hallucinated or off-topic response. It's logged as a success. Nobody catches it.",
-    highlight: "status=ok · zero validation · user gets wrong answer",
-    logs: [
-      { time: "12:04:01", level: "info",    text: "run_id=18293  agent started" },
-      { time: "12:04:05", level: "info",    text: "LLM response generated" },
-      { time: "—",        level: "comment", text: '  output: "I\'m sorry, I couldn\'t find' },
-      { time: "—",        level: "comment", text: '          that information. Try again."' },
-      { time: "12:04:05", level: "info",    text: "run completed · status=ok" },
-      { time: "—",        level: "comment", text: "" },
-      { time: "—",        level: "error",   text: "expected:  product recommendation" },
-      { time: "—",        level: "error",   text: "got:       generic fallback (hallucination)" },
-      { time: "—",        level: "error",   text: "user sees: ✗ wrong answer" },
-      { time: "—",        level: "comment", text: "← no validation configured · no alert" },
-    ],
-  },
-  {
-    id: 3,
-    label: "No clear root cause",
-    description:
-      "All three runs failed. You dig through logs for hours. Every error says 'exit code 1'. Nothing tells you why.",
-    highlight: "Dottle identifies root cause in < 10 seconds",
-    logs: [
-      { time: "12:04:47", level: "error",   text: "run_id=18291  failed · exit code 1" },
-      { time: "12:04:11", level: "error",   text: "run_id=18292  failed · exit code 1" },
-      { time: "12:04:05", level: "error",   text: "run_id=18293  failed · exit code 1" },
-      { time: "—",        level: "comment", text: "" },
-      { time: "—",        level: "cmd",     text: "$ grep 'root cause' agent.log" },
-      { time: "—",        level: "error",   text: "  no matches found" },
-      { time: "—",        level: "cmd",     text: "$ check retry_config" },
-      { time: "—",        level: "error",   text: "  ReferenceError: retry_config not defined" },
-      { time: "—",        level: "comment", text: "" },
-      { time: "—",        level: "comment", text: "← you are on your own" },
-    ],
-  },
-];
-
-function LogLine({ line, visible }: { line: StepLog; visible: boolean }) {
-  const colors: Record<StepLog["level"], string> = {
-    info:    "text-[#4B5563]",
-    warn:    "text-[#D97706]",
-    error:   "text-[#EF4444]",
-    cmd:     "text-[#6B8F6E]",
-    comment: "text-[#374151]",
-  };
-
+// ─── How it works ──────────────────────────────────────────────────────────────
+function HowItWorks() {
+  const isMobile = useWindowWidth() < 1024;
   return (
-    <div
-      className={`flex gap-3 text-xs font-mono leading-[1.7] transition-opacity duration-300 ${
-        visible ? "opacity-100" : "opacity-0"
-      }`}
-    >
-      {line.time !== "—" ? (
-        <span className="text-[#2D3748] shrink-0 select-none">{line.time}</span>
-      ) : (
-        <span className="w-[52px] shrink-0" />
-      )}
-      <span className={colors[line.level]}>{line.text}</span>
-    </div>
+    <section id="how" style={{ maxWidth: 1200, margin: "0 auto", padding: isMobile ? "40px 20px 56px" : "40px 32px 80px" }}>
+      <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1.1fr", gap: isMobile ? 36 : 64, alignItems: "center" }}>
+        <div>
+          <SectionLabel>How it works</SectionLabel>
+          <h2 style={{ fontFamily: "var(--font-display)", fontSize: "clamp(28px, 3vw, 40px)", lineHeight: 1.1, letterSpacing: "-0.025em", fontWeight: 500, margin: "16px 0 16px" }}>
+            Two lines. Every step captured.
+          </h2>
+          <p style={{ color: MUTED, fontSize: 16, lineHeight: 1.55, margin: "0 0 24px" }}>
+            Drop the SDK in. Dottle instruments your agent&rsquo;s tools, LLM calls, and control flow automatically. No custom spans, no manual thresholds.
+          </p>
+          <ol style={{ listStyle: "none", padding: 0, margin: 0, display: "grid", gap: 14 }}>
+            {["Install the SDK", "Wrap your agent entrypoint", "Ship to prod — dottle watches from step 1"].map((t, i) => (
+              <li key={i} style={{ display: "flex", gap: 14, alignItems: "baseline", fontSize: 15 }}>
+                <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: A, width: 20, flexShrink: 0 }}>0{i + 1}</span>
+                <span>{t}</span>
+              </li>
+            ))}
+          </ol>
+        </div>
+        <CodeBlock code={AGENT_CODE} />
+      </div>
+    </section>
   );
 }
 
-function ScrollSteps() {
-  const wrapperRef = useRef<HTMLDivElement>(null);
-  const [activeStep, setActiveStep] = useState(0);
-  const [logProgress, setLogProgress] = useState(0);
-
-  const onScroll = useCallback(() => {
-    const el = wrapperRef.current;
-    if (!el) return;
-
-    const rect      = el.getBoundingClientRect();
-    const total     = el.offsetHeight - window.innerHeight;
-    const scrolled  = -rect.top;
-
-    if (scrolled <= 0) {
-      setActiveStep(0);
-      setLogProgress(0);
-      return;
-    }
-    if (scrolled >= total) {
-      setActiveStep(3);
-      setLogProgress(1);
-      return;
-    }
-
-    const progress  = scrolled / total;           // 0 → 1
-    const raw       = progress * STEPS.length;    // 0 → 4
-    const stepIndex = Math.min(Math.floor(raw), STEPS.length - 1);
-    const within    = raw - stepIndex;            // 0 → 1 within step
-
-    setActiveStep(stepIndex);
-    setLogProgress(within);
-  }, []);
+// ─── Scroll-driven Alerts Reel ─────────────────────────────────────────────────
+function AlertsReel({ onDarkChange }: { onDarkChange?: (dark: boolean) => void }) {
+  const isMobile    = useWindowWidth() < 768;
+  const wrapperRef  = useRef<HTMLDivElement>(null);
+  const hasScrolled = useRef(false);
+  const [step, setStep] = useState(0);
+  const N = ALERT_DATA.length;
 
   useEffect(() => {
+    if (isMobile) { onDarkChange?.(false); return; }
+    const onScroll = () => {
+      const el = wrapperRef.current;
+      if (!el) return;
+      const rect    = el.getBoundingClientRect();
+      const scrolled = Math.max(0, -rect.top);
+      const total    = el.offsetHeight - window.innerHeight;
+      if (total <= 0) return;
+      const progress = Math.min(scrolled / total, 1);
+      const next     = Math.min(Math.floor(progress * N), N - 1);
+      if (next > 0) hasScrolled.current = true;
+      setStep(next);
+      onDarkChange?.(rect.top <= 0 && rect.bottom > window.innerHeight * 0.1);
+    };
     window.addEventListener("scroll", onScroll, { passive: true });
     onScroll();
     return () => window.removeEventListener("scroll", onScroll);
-  }, [onScroll]);
+  }, [N, onDarkChange, isMobile]);
 
-  const step = STEPS[activeStep];
-  // reveal logs progressively within the current step
-  const visibleLogs = Math.ceil(logProgress * step.logs.length);
+  const Visual = VISUALS[step];
 
-  return (
-    <section className="border-t border-[#1F2937]">
-      {/* ── Mobile: simple stacked list ── */}
-      <div className="lg:hidden py-20 px-6">
-        <div className="max-w-6xl mx-auto">
-          <p className="text-xs text-[#EF4444] uppercase tracking-widest font-semibold mb-3">
-            The problem
-          </p>
-          <h2 className="text-3xl font-semibold text-white mb-12">
-            Agents fail silently.
-          </h2>
-          <div className="space-y-8">
-            {STEPS.map((s, i) => (
-              <div
-                key={s.id}
-                className="rounded-2xl border border-[#1F2937] bg-[#080C10] p-6"
-              >
-                <div className="flex items-center gap-3 mb-3">
-                  <span className="text-[11px] font-mono text-[#374151]">
-                    0{i + 1}
-                  </span>
-                  <h3 className="text-[#E5E7EB] font-medium text-sm">
-                    {s.label}
-                  </h3>
-                </div>
-                <p className="text-[#6B7280] text-sm leading-relaxed">
-                  {s.description}
-                </p>
-              </div>
-            ))}
+  // ── Mobile: static list ──────────────────────────────────────────────────────
+  if (isMobile) {
+    return (
+      <section style={{ background: DBG, padding: "72px 20px 80px" }}>
+        <div style={{ marginBottom: 48 }}>
+          <div style={{ display: "inline-flex", alignItems: "center", gap: 8, fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: "0.13em", textTransform: "uppercase", color: A }}>
+            <span style={{ width: 6, height: 6, borderRadius: 99, background: A, display: "inline-block" }} />
+            Real-time alerts
           </div>
-        </div>
-      </div>
-
-      {/* ── Desktop: scroll-driven sticky ── */}
-      <div
-        ref={wrapperRef}
-        className="hidden lg:block relative"
-        style={{ height: "300vh" }}
-      >
-        <div className="sticky top-0 h-screen overflow-hidden">
-          <div className="h-full flex flex-col justify-center max-w-6xl mx-auto px-6 py-16">
-            {/* Section header */}
-            <div className="mb-10">
-              <p className="text-xs text-[#EF4444] uppercase tracking-widest font-semibold mb-2">
-                The problem
-              </p>
-              <h2 className="text-3xl font-semibold text-white">
-                Agents fail silently.{" "}
-                <span className="text-[#374151]">
-                  Logs don&apos;t tell you why.
-                </span>
-              </h2>
-            </div>
-
-            <div className="grid grid-cols-[360px_1fr] gap-10 items-start">
-              {/* ── Left: step list ── */}
-              <div className="space-y-1">
-                {STEPS.map((s) => {
-                  const isActive = s.id === activeStep;
-                  const isDone   = s.id < activeStep;
-                  return (
-                    <div
-                      key={s.id}
-                      className={`rounded-xl p-4 transition-all duration-300 ${
-                        isActive
-                          ? "bg-[#4F6F520E] border border-[#4F6F5228]"
-                          : "border border-transparent"
-                      }`}
-                    >
-                      <div className="flex items-start gap-3">
-                        {/* Status dot */}
-                        <div
-                          className={`mt-0.5 w-5 h-5 rounded-full border flex items-center justify-center shrink-0 transition-all duration-300 ${
-                            isDone
-                              ? "border-[#4F6F5240] bg-[#4F6F5215]"
-                              : isActive
-                              ? "border-[#EF444440] bg-[#EF444410]"
-                              : "border-[#1F2937]"
-                          }`}
-                        >
-                          {isDone && (
-                            <CheckCircle2 size={12} className="text-[#4F6F52]" />
-                          )}
-                          {isActive && (
-                            <span className="w-2 h-2 rounded-full bg-[#EF4444] live-dot" />
-                          )}
-                        </div>
-
-                        <div>
-                          <p
-                            className={`text-sm font-medium transition-colors duration-300 ${
-                              isActive
-                                ? "text-[#E5E7EB]"
-                                : isDone
-                                ? "text-[#4B5563]"
-                                : "text-[#374151]"
-                            }`}
-                          >
-                            {s.label}
-                          </p>
-                          {isActive && (
-                            <p className="text-xs text-[#6B7280] mt-1.5 leading-relaxed step-in">
-                              {s.description}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-
-                {/* Scroll nudge */}
-                <p className="text-[11px] text-[#2D3748] pl-4 pt-3">
-                  ↓ scroll to see each failure
-                </p>
-              </div>
-
-              {/* ── Right: terminal ── */}
-              <div className="rounded-2xl border border-[#1F2937] bg-[#080C10] overflow-hidden shadow-2xl shadow-black/50 terminal">
-                {/* Terminal bar */}
-                <div className="flex items-center gap-1.5 px-4 py-2.5 bg-[#0B0F14] border-b border-[#1F2937]">
-                  <span className="w-2.5 h-2.5 rounded-full bg-[#EF444440]" />
-                  <span className="w-2.5 h-2.5 rounded-full bg-[#F59E0B40]" />
-                  <span className="w-2.5 h-2.5 rounded-full bg-[#22C55E40]" />
-                  <span className="ml-3 text-[11px] text-[#2D3748] font-mono">
-                    agent.log — live
-                  </span>
-                  <span className="ml-auto flex items-center gap-1.5 text-[11px]">
-                    <span className="text-[#374151] font-mono">step</span>
-                    <span className="text-[#4F6F52] font-mono font-semibold">
-                      0{activeStep + 1}
-                    </span>
-                    <span className="text-[#374151] font-mono">/ 04</span>
-                  </span>
-                </div>
-
-                {/* Log area */}
-                <div className="p-5 min-h-[320px] flex flex-col justify-between">
-                  <div className="space-y-0.5">
-                    {/* Step label */}
-                    <div className="text-[11px] font-mono text-[#2D3748] uppercase tracking-widest mb-4 pb-3 border-b border-[#0d1117]">
-                      # {step.label}
-                    </div>
-
-                    {step.logs.map((line, i) => (
-                      <LogLine
-                        key={`${activeStep}-${i}`}
-                        line={line}
-                        visible={i < visibleLogs || activeStep === 3}
-                      />
-                    ))}
-                  </div>
-
-                  {/* Step 3 special: Dottle detects */}
-                  {activeStep === 3 && (
-                    <div className="mt-5 rounded-xl border border-[#4F6F5228] bg-[#4F6F520C] p-4">
-                      <div className="flex items-center gap-2 mb-2.5">
-                        <CheckCircle2 size={13} className="text-[#4F6F52]" />
-                        <span className="text-[11px] text-[#6B8F6E] font-semibold uppercase tracking-widest">
-                          Root cause — Dottle analysis
-                        </span>
-                      </div>
-                      <p className="text-xs font-mono text-[#9CA3AF] leading-[1.6]">
-                        All 3 runs share the same cause:
-                        <br />
-                        <span className="text-[#86EFAC]">max_retries</span>=0 in
-                        tool config. No backoff. No fallback.
-                      </p>
-                      <p className="text-[#6B8F6E] text-xs font-mono mt-2">
-                        → Fix: set max_retries ≥ 3 + add exponential backoff
-                      </p>
-                    </div>
-                  )}
-
-                  {/* Bottom annotation */}
-                  <div className="mt-4 pt-3 border-t border-[#0d1117]">
-                    <p
-                      className={`text-xs font-mono ${
-                        activeStep === 3
-                          ? "text-[#4F6F52]"
-                          : "text-[#EF4444] opacity-60"
-                      }`}
-                    >
-                      {step.highlight}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// SOLUTION
-// ─────────────────────────────────────────────────────────────────────────────
-
-function Solution() {
-  const features = [
-    {
-      icon: <Eye size={18} />,
-      title: "Detect failures automatically",
-      body: "Loops, tool errors, bad outputs — caught the moment they happen. No manual thresholds or configs.",
-    },
-    {
-      icon: <GitBranch size={18} />,
-      title: "Trace every agent run",
-      body: "Every step, tool call, and LLM decision captured end-to-end. Full timeline, not just error lines.",
-    },
-    {
-      icon: <XCircle size={18} />,
-      title: "Highlight exactly where it failed",
-      body: "Not 'something broke at step 4.' The exact call, input, and response — isolated and explained.",
-    },
-    {
-      icon: <Zap size={18} />,
-      title: "Suggest the root cause",
-      body: "Pattern-matched diagnosis across thousands of agent runs. We tell you why and how to fix it.",
-    },
-  ];
-
-  return (
-    <section className="py-24 px-6 border-t border-[#1F2937]">
-      <div className="max-w-6xl mx-auto">
-        <div className="max-w-2xl mb-14">
-          <p className="text-xs text-[#4F6F52] uppercase tracking-widest font-semibold mb-3">
-            The solution
-          </p>
-          <h2 className="text-3xl sm:text-[2.25rem] font-semibold text-white mb-4 leading-tight">
-            We don&apos;t just show logs.
-            <br />
-            <span className="text-[#6B7280]">We tell you what broke.</span>
+          <h2 style={{ fontFamily: "var(--font-display)", fontSize: "clamp(32px, 8vw, 48px)", lineHeight: 1.08, letterSpacing: "-0.035em", fontWeight: 500, color: DFG, margin: "14px 0 0" }}>
+            Get alerts when…
           </h2>
-          <p className="text-[#6B7280] text-[15px] leading-relaxed">
-            Other tools give you observability — a passive stream of data you
-            still have to interpret. Dottle does the analysis for you.
-          </p>
         </div>
-
-        <div className="grid sm:grid-cols-2 gap-4">
-          {features.map(({ icon, title, body }) => (
-            <div
-              key={title}
-              className="card-lift rounded-2xl border border-[#1F2937] bg-[#080C10] p-6 flex gap-5"
-            >
-              <div className="w-9 h-9 rounded-xl bg-[#4F6F5210] border border-[#4F6F5220] flex items-center justify-center text-[#6B8F6E] shrink-0">
-                {icon}
-              </div>
-              <div>
-                <h3 className="text-[#E5E7EB] font-medium text-sm mb-2">
-                  {title}
-                </h3>
-                <p className="text-[#6B7280] text-sm leading-relaxed">{body}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// HOW IT WORKS
-// ─────────────────────────────────────────────────────────────────────────────
-
-function HowItWorks() {
-  const steps = [
-    {
-      n: "01",
-      icon: <Code2 size={18} />,
-      title: "Connect your agent",
-      body: "SDK or webhook — works with any framework. Minimal code change, no infrastructure to manage.",
-      meta: "< 30 min setup",
-    },
-    {
-      n: "02",
-      icon: <Activity size={18} />,
-      title: "We monitor every run",
-      body: "Every step, token, tool call, and LLM response is captured in real-time, automatically.",
-      meta: "Zero config",
-    },
-    {
-      n: "03",
-      icon: <Bell size={18} />,
-      title: "Get instant failure alerts",
-      body: "When something breaks we flag it, explain it, and send you the root cause via Slack or webhook.",
-      meta: "Alert in < 10s",
-    },
-  ];
-
-  return (
-    <section id="how" className="py-24 px-6 border-t border-[#1F2937]">
-      <div className="max-w-6xl mx-auto">
-        <div className="max-w-2xl mb-14">
-          <h2 className="text-3xl sm:text-[2.25rem] font-semibold text-white mb-3 leading-tight">
-            Set up in under an hour.
-          </h2>
-          <p className="text-[#6B7280] text-[15px]">
-            Monitoring from day one. No dedicated team required.
-          </p>
-        </div>
-
-        <div className="grid lg:grid-cols-3 gap-4 relative">
-          <div className="hidden lg:block absolute top-[44px] left-[calc(33.33%+24px)] right-[calc(33.33%+24px)] h-px bg-gradient-to-r from-[#4F6F5230] via-[#4F6F5250] to-[#4F6F5230]" />
-
-          {steps.map(({ n, icon, title, body, meta }) => (
-            <div
-              key={n}
-              className="card-lift rounded-2xl border border-[#1F2937] bg-[#080C10] p-6"
-            >
-              <div className="flex items-center gap-3 mb-5">
-                <div className="w-9 h-9 rounded-xl bg-[#4F6F5210] border border-[#4F6F5220] flex items-center justify-center text-[#6B8F6E]">
-                  {icon}
-                </div>
-                <span className="text-[11px] font-mono text-[#2D3748] font-semibold">
-                  {n}
-                </span>
-              </div>
-              <h3 className="text-[#E5E7EB] font-medium text-[15px] mb-2">
-                {title}
+        <div style={{ display: "grid", gap: 40 }}>
+          {ALERT_DATA.map((item, i) => (
+            <div key={i} style={{ borderTop: "1px solid rgba(255,255,255,0.08)", paddingTop: 32 }}>
+              <h3 style={{ fontFamily: "var(--font-display)", fontSize: "clamp(22px, 6vw, 32px)", lineHeight: 1.1, letterSpacing: "-0.025em", fontWeight: 600, color: DFG, margin: "0 0 12px" }}>
+                {item.phrase.charAt(0).toUpperCase() + item.phrase.slice(1)}.
               </h3>
-              <p className="text-[#6B7280] text-sm leading-relaxed mb-4">
-                {body}
-              </p>
-              <span className="inline-block text-[11px] text-[#4F6F52] bg-[#4F6F5210] border border-[#4F6F5220] px-3 py-1 rounded-full font-medium">
-                {meta}
-              </span>
+              <p style={{ color: DMUTED, fontSize: 15, lineHeight: 1.65, margin: 0 }}>{item.desc}</p>
             </div>
           ))}
         </div>
-      </div>
-    </section>
-  );
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// COMPARISON TABLE
-// ─────────────────────────────────────────────────────────────────────────────
-
-function Comparison() {
-  const rows: { label: string; traditional: string; dottle: string }[] = [
-    { label: "What you see",       traditional: "Logs and traces",        dottle: "Failure diagnosis"        },
-    { label: "Debugging",          traditional: "You do it manually",     dottle: "Root cause explained"     },
-    { label: "Alerting",           traditional: "Passive dashboards",     dottle: "Real-time alerts"         },
-    { label: "Analysis timing",    traditional: "Post-mortem",            dottle: "Instant, as it happens"   },
-    { label: "Loop detection",     traditional: "Not detected",           dottle: "Caught automatically"     },
-    { label: "Root cause",         traditional: "You figure it out",      dottle: "Suggested by Dottle"     },
-  ];
-
-  return (
-    <section className="py-24 px-6 border-t border-[#1F2937]">
-      <div className="max-w-6xl mx-auto">
-        <div className="max-w-2xl mb-14">
-          <h2 className="text-3xl sm:text-[2.25rem] font-semibold text-white mb-4 leading-tight">
-            Not another{" "}
-            <span className="line-through text-[#2D3748]">observability</span>{" "}
-            tool.
-          </h2>
-          <p className="text-[#6B7280] text-[15px] leading-relaxed">
-            Langfuse, LangSmith, and Datadog show you data.
-            Dottle tells you what went wrong and why.
-          </p>
-        </div>
-
-        <div className="rounded-2xl border border-[#1F2937] overflow-hidden max-w-4xl">
-          <div className="grid grid-cols-3 bg-[#080C10] border-b border-[#1F2937]">
-            <div className="px-6 py-4 text-[11px] text-[#374151] uppercase tracking-widest font-semibold">
-              Feature
-            </div>
-            <div className="px-6 py-4 border-l border-[#1F2937]">
-              <p className="text-[11px] text-[#374151] uppercase tracking-widest font-semibold">
-                Traditional tools
-              </p>
-              <p className="text-[10px] text-[#2D3748] mt-0.5">
-                Langfuse, LangSmith, Datadog
-              </p>
-            </div>
-            <div className="px-6 py-4 border-l border-[#1F2937]">
-              <p className="text-[11px] text-[#4F6F52] uppercase tracking-widest font-semibold">
-                Dottle
-              </p>
-              <p className="text-[10px] text-[#374151] mt-0.5">
-                Active failure detection
-              </p>
-            </div>
-          </div>
-
-          {rows.map(({ label, traditional, dottle }, i) => (
-            <div
-              key={label}
-              className={`trow grid grid-cols-3 border-b border-[#1F2937] last:border-0 ${
-                i % 2 === 0 ? "bg-[#080C10]" : "bg-[#060A0D]"
-              }`}
-            >
-              <div className="px-6 py-4 text-sm text-[#6B7280]">{label}</div>
-              <div className="px-6 py-4 text-sm text-[#374151] border-l border-[#1F2937] flex items-center gap-2">
-                <XCircle size={13} className="text-[#2D3748] shrink-0" />
-                {traditional}
-              </div>
-              <div className="px-6 py-4 text-sm text-[#E5E7EB] border-l border-[#1F2937] flex items-center gap-2">
-                <CheckCircle2 size={13} className="text-[#4F6F52] shrink-0" />
-                {dottle}
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// WHO IT'S FOR
-// ─────────────────────────────────────────────────────────────────────────────
-
-function WhoItsFor() {
-  const personas = [
-    {
-      icon: <Cpu size={18} />,
-      title: "Startups using LangChain or custom agents",
-      body: "You move fast and can't afford production failures killing your demo or your users' trust.",
-    },
-    {
-      icon: <Users size={18} />,
-      title: "Teams with agents serving real users",
-      body: "Your agent is customer-facing. A broken run isn't just an error — it's a bad user experience.",
-    },
-    {
-      icon: <Terminal size={18} />,
-      title: "Engineers tired of debugging blindly",
-      body: "You've spent hours in logs with no answers. Dottle tells you what broke in seconds.",
-    },
-  ];
-
-  return (
-    <section className="py-24 px-6 border-t border-[#1F2937]">
-      <div className="max-w-6xl mx-auto">
-        <div className="max-w-2xl mb-14">
-          <h2 className="text-3xl sm:text-[2.25rem] font-semibold text-white mb-3 leading-tight">
-            Built for teams running AI agents
-            <br />
-            <span className="text-[#6B7280]">in production.</span>
-          </h2>
-          <p className="text-[#4B5563] text-[15px]">
-            Not for researchers. Not for hobby projects.
-          </p>
-        </div>
-
-        <div className="grid lg:grid-cols-3 gap-4">
-          {personas.map(({ icon, title, body }) => (
-            <div
-              key={title}
-              className="card-lift rounded-2xl border border-[#1F2937] bg-[#080C10] p-6"
-            >
-              <div className="w-9 h-9 rounded-xl bg-[#4F6F5210] border border-[#4F6F5220] flex items-center justify-center text-[#6B8F6E] mb-5">
-                {icon}
-              </div>
-              <h3 className="text-[#E5E7EB] font-medium text-[15px] mb-2 leading-snug">
-                {title}
-              </h3>
-              <p className="text-[#6B7280] text-sm leading-relaxed">{body}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// CTA
-// ─────────────────────────────────────────────────────────────────────────────
-
-function CTA() {
-  const [email,    setEmail]    = useState("");
-  const [building, setBuilding] = useState("");
-  const [done,     setDone]     = useState(false);
-
-  function submit(e: React.FormEvent) {
-    e.preventDefault();
-    if (!email.trim()) return;
-    setDone(true);
+      </section>
+    );
   }
 
-  return (
-    <section id="cta" className="py-24 px-6 border-t border-[#1F2937] relative overflow-hidden">
-      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[600px] h-[260px] bg-[#4F6F52] opacity-[0.055] rounded-full blur-[90px] pointer-events-none" />
+  // ── Desktop: scroll-driven sticky ───────────────────────────────────────────
+  // First text is already in place — no slide-in. Subsequent ones fly in from top.
+  const textInitial = !hasScrolled.current && step === 0
+    ? { opacity: 1, y: 0 }
+    : { opacity: 0, y: -80 };
 
-      <div className="relative max-w-5xl mx-auto">
-        {/* Header */}
-        <div className="text-center mb-12">
-          <h2 className="text-3xl sm:text-[2.25rem] font-semibold text-white mb-3 leading-tight">
-            Stop guessing why your agent failed.
-          </h2>
-          <p className="text-[#6B7280] text-[15px] leading-relaxed max-w-lg mx-auto">
-            Pick how you want to get started. We set everything up for you.
-          </p>
+  return (
+    <section
+      ref={wrapperRef}
+      style={{ background: DBG, position: "relative", height: `${(N + 1) * 100}vh` }}
+    >
+      <div style={{
+        position: "sticky", top: 0, height: "100vh", overflow: "hidden",
+        display: "flex", alignItems: "stretch",
+      }}>
+
+        {/* ── Left: visual — 4:3 frame, slow crossfade ── */}
+        <div style={{
+          flex: "0 0 62%",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          padding: "calc(44px + 10vh) calc(36px + 2vw) calc(44px + 10vh) calc(60px + 2vw)",
+        }}>
+          {/* Aspect-ratio wrapper — swap Visual() for a Next.js <Image> to add your own artwork */}
+          <div style={{ width: "90%", aspectRatio: "4 / 3", position: "relative", borderRadius: 14, overflow: "hidden" }}>
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={`vis-${step}`}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.9, ease: "easeInOut" }}
+                style={{ position: "absolute", inset: 0 }}
+              >
+                <Visual />
+              </motion.div>
+            </AnimatePresence>
+          </div>
         </div>
 
-        {/* Two-column cards */}
-        <div className="grid lg:grid-cols-2 gap-5 items-start">
-
-          {/* ── Left: email form ── */}
-          <div className="rounded-2xl border border-[#1F2937] bg-[#080C10] p-7">
-            <div className="mb-5">
-              <p className="text-[11px] text-[#4F6F52] uppercase tracking-widest font-semibold mb-1">
-                Option 1
-              </p>
-              <h3 className="text-white font-semibold text-lg">
-                Get monitored — free setup
-              </h3>
-              <p className="text-[#6B7280] text-sm mt-1.5 leading-relaxed">
-                Drop your email. We reach out and set everything up.
-                No dashboards, no config.
-              </p>
-            </div>
-
-            {done ? (
-              <div className="rounded-xl border border-[#4F6F5228] bg-[#4F6F520A] p-7 text-center">
-                <CheckCircle2 size={32} className="text-[#4F6F52] mx-auto mb-3" />
-                <p className="text-white font-semibold mb-1">You&apos;re in.</p>
-                <p className="text-[#6B7280] text-sm">
-                  We&apos;ll reach out within 24 hours.
-                </p>
-              </div>
-            ) : (
-              <form onSubmit={submit} className="space-y-4">
-                <div>
-                  <label className="block text-[10px] text-[#4B5563] uppercase tracking-widest font-semibold mb-2">
-                    Work email
-                  </label>
-                  <input
-                    type="email"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="you@company.com"
-                    className="w-full bg-[#0B0F14] border border-[#1F2937] focus:border-[#4F6F52] rounded-xl px-4 py-3 text-sm text-[#E5E7EB] placeholder-[#2D3748] outline-none transition-colors"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[10px] text-[#4B5563] uppercase tracking-widest font-semibold mb-2">
-                    What are you building?
-                  </label>
-                  <textarea
-                    value={building}
-                    onChange={(e) => setBuilding(e.target.value)}
-                    placeholder="e.g. customer support agent, research pipeline..."
-                    rows={3}
-                    className="w-full bg-[#0B0F14] border border-[#1F2937] focus:border-[#4F6F52] rounded-xl px-4 py-3 text-sm text-[#E5E7EB] placeholder-[#2D3748] outline-none transition-colors resize-none"
-                  />
-                </div>
-                <button
-                  type="submit"
-                  className="glow-btn w-full flex items-center justify-center gap-2 bg-[#4F6F52] hover:bg-[#3D5940] text-white font-medium px-6 py-3.5 rounded-xl transition-colors text-[15px]"
-                >
-                  Get your agent monitored (free)
-                  <ChevronRight size={15} />
-                </button>
-                <p className="text-center text-[11px] text-[#2D3748]">
-                  Free setup · No credit card · We configure everything
-                </p>
-              </form>
-            )}
-          </div>
-
-          {/* ── Divider (mobile) ── */}
-          <div className="lg:hidden flex items-center gap-3 text-[#2D3748] text-xs">
-            <div className="flex-1 h-px bg-[#1F2937]" />
-            or
-            <div className="flex-1 h-px bg-[#1F2937]" />
-          </div>
-
-          {/* ── Right: book a demo ── */}
-          <div className="rounded-2xl border border-[#1F2937] bg-[#080C10] p-7 flex flex-col">
-            <div className="mb-6">
-              <p className="text-[11px] text-[#6B7280] uppercase tracking-widest font-semibold mb-1">
-                Option 2
-              </p>
-              <h3 className="text-white font-semibold text-lg">
-                Book a 15-min demo
-              </h3>
-              <p className="text-[#6B7280] text-sm mt-1.5 leading-relaxed">
-                Talk to us directly. We&apos;ll show you how Dottle works on
-                a real agent and answer any questions.
-              </p>
-            </div>
-
-            {/* What to expect */}
-            <div className="space-y-3 mb-7">
-              {[
-                "Live walkthrough on your stack",
-                "See a real failure detection in action",
-                "Get your questions answered directly",
-              ].map((item) => (
-                <div key={item} className="flex items-start gap-2.5">
-                  <CheckCircle2
-                    size={14}
-                    className="text-[#4F6F52] shrink-0 mt-0.5"
-                  />
-                  <p className="text-[#9CA3AF] text-sm">{item}</p>
-                </div>
-              ))}
-            </div>
-
-            {/* Spacer to push button to bottom on desktop */}
-            <div className="flex-1" />
-
-            <a
-              href="https://cal.com/abhinawago/15min"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="w-full flex items-center justify-center gap-2.5 border border-[#2D3748] hover:border-[#4F6F5240] hover:bg-[#4F6F520A] text-[#E5E7EB] font-medium px-6 py-3.5 rounded-xl transition-all text-[15px] group"
+        {/* ── Right: text — enters from top, exits to bottom ── */}
+        <div style={{
+          flex: "0 0 38%",
+          display: "flex", flexDirection: "column", justifyContent: "center",
+          padding: "60px 64px 60px 24px",
+          position: "relative", overflow: "hidden",
+        }}>
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={`text-${step}`}
+              initial={textInitial}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 100 }}
+              transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
             >
-              <Calendar
-                size={16}
-                className="text-[#6B8F6E] group-hover:text-[#4F6F52] transition-colors"
-              />
-              Book a 15-min call
-              <ArrowRight
-                size={14}
-                className="text-[#4B5563] group-hover:text-[#6B8F6E] transition-colors ml-auto"
-              />
-            </a>
-            <p className="text-center text-[11px] text-[#2D3748] mt-3">
-              No pitch · No pressure · 15 minutes flat
-            </p>
-          </div>
+              {/* Small label — like the reference screenshot */}
+              <div style={{
+                display: "inline-flex", alignItems: "center", gap: 8,
+                fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: "0.13em",
+                textTransform: "uppercase", color: A, marginBottom: 28,
+              }}>
+                <span style={{ width: 6, height: 6, borderRadius: 99, background: A, display: "inline-block" }} />
+                Real-time
+              </div>
 
+              {/* Large heading */}
+              <h3 style={{
+                fontFamily: "var(--font-display)",
+                fontSize: "clamp(40px, 5.2vw, 72px)",
+                lineHeight: 1.04, letterSpacing: "-0.04em", fontWeight: 600,
+                color: DFG, margin: "0 0 28px",
+              }}>
+                {ALERT_DATA[step].phrase.charAt(0).toUpperCase() + ALERT_DATA[step].phrase.slice(1)}.
+              </h3>
+
+              {/* Body */}
+              <p style={{ color: DMUTED, fontSize: 18, lineHeight: 1.7, margin: 0, maxWidth: 380 }}>
+                {ALERT_DATA[step].desc}
+              </p>
+            </motion.div>
+          </AnimatePresence>
+
+          {/* Progress pills */}
+          <div style={{ display: "flex", gap: 6, alignItems: "center", marginTop: 56 }}>
+            {ALERT_DATA.map((_, i) => (
+              <span key={i} style={{
+                height: 3, borderRadius: 99, display: "inline-block",
+                width: i === step ? 32 : 6,
+                background: i === step ? A : i < step ? "rgba(217,119,87,0.3)" : "rgba(255,255,255,0.1)",
+                transition: "width 400ms ease, background 400ms ease",
+              }} />
+            ))}
+            <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "rgba(255,255,255,0.2)", marginLeft: 12 }}>
+              scroll
+            </span>
+          </div>
+        </div>
+
+      </div>
+    </section>
+  );
+}
+
+// ─── Testimonials ──────────────────────────────────────────────────────────────
+function Testimonials() {
+  const w = useWindowWidth();
+  const cols = w < 768 ? "1fr" : w < 1024 ? "repeat(2, 1fr)" : "repeat(3, 1fr)";
+  return (
+    <section style={{ maxWidth: 1200, margin: "0 auto", padding: w < 768 ? "56px 20px" : "80px 32px" }}>
+      <SectionLabel>From teams in production</SectionLabel>
+      <div style={{ display: "grid", gridTemplateColumns: cols, gap: 20, marginTop: 32 }}>
+        {TESTIMONIALS.map((t, i) => (
+          <div key={i} style={{ background: PANEL, border: `1px solid ${LINE}`, borderRadius: 12, padding: 24 }}>
+            <div style={{ fontSize: 15.5, lineHeight: 1.55, color: FG, letterSpacing: "-0.005em" }}>
+              &ldquo;{t.quote}&rdquo;
+            </div>
+            <div style={{ marginTop: 20, display: "flex", alignItems: "center", gap: 10 }}>
+              <div style={{ width: 32, height: 32, borderRadius: 99, flexShrink: 0, background: `linear-gradient(135deg, ${A}, ${A}66)` }} />
+              <div style={{ fontSize: 13 }}>
+                <div style={{ fontWeight: 500 }}>{t.name}</div>
+                <div style={{ color: MUTED, fontFamily: "var(--font-mono)", fontSize: 11 }}>{t.title}</div>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+// ─── Pricing ───────────────────────────────────────────────────────────────────
+function Pricing() {
+  const [hovered, setHovered] = useState<number | null>(null);
+  const w = useWindowWidth();
+  const cols = w < 768 ? "1fr" : w < 1024 ? "repeat(2, 1fr)" : "repeat(3, 1fr)";
+  return (
+    <section id="pricing" style={{ maxWidth: 1200, margin: "0 auto", padding: w < 768 ? "56px 20px" : "80px 32px" }}>
+      <SectionLabel>Pricing</SectionLabel>
+      <h2 style={{ fontFamily: "var(--font-display)", fontSize: "clamp(28px, 3.6vw, 48px)", lineHeight: 1.08, letterSpacing: "-0.03em", fontWeight: 500, margin: "16px 0 40px" }}>
+        Simple, volume-based pricing.
+      </h2>
+      <div style={{ display: "grid", gridTemplateColumns: cols, gap: 20 }}>
+        {PLANS.map((p, i) => (
+          <a
+            key={p.name}
+            href={p.name === "Enterprise" ? CAL : REGISTER}
+            target="_blank"
+            rel="noopener noreferrer"
+            onMouseEnter={() => setHovered(i)}
+            onMouseLeave={() => setHovered(null)}
+            style={{
+              background: hovered === i ? "#F2F2F0" : PANEL,
+              border: `1px solid ${hovered === i ? "rgba(0,0,0,0.11)" : LINE}`,
+              borderRadius: 14,
+              padding: 32,
+              position: "relative",
+              textDecoration: "none",
+              color: "inherit",
+              display: "block",
+              cursor: "pointer",
+              transition: "background 200ms ease, border-color 200ms ease, transform 220ms ease, box-shadow 220ms ease",
+              transform: hovered === i ? "translateY(-4px)" : "translateY(0)",
+              boxShadow: hovered === i ? "0 12px 32px rgba(0,0,0,0.07)" : "0 0 0 rgba(0,0,0,0)",
+            }}
+          >
+            <div style={{ fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", opacity: 0.55 }}>{p.name}</div>
+            <div style={{ fontFamily: "var(--font-display)", fontSize: 44, fontWeight: 500, letterSpacing: "-0.03em", margin: "16px 0 4px" }}>{p.price}</div>
+            <div style={{ fontSize: 13, opacity: 0.5, marginBottom: 28 }}>{p.tag}</div>
+            <ul style={{ listStyle: "none", padding: 0, margin: "0 0 32px", display: "grid", gap: 12 }}>
+              {p.feats.map(f => (
+                <li key={f} style={{ display: "flex", gap: 10, fontSize: 14, alignItems: "center" }}>
+                  <span style={{ color: A, flexShrink: 0 }}><IcoCheck /></span>{f}
+                </li>
+              ))}
+            </ul>
+            <div style={{
+              width: "100%", textAlign: "center", padding: "10px 16px",
+              borderRadius: 8, border: `1px solid ${hovered === i ? "rgba(0,0,0,0.16)" : LINE}`,
+              fontSize: 14, fontWeight: 500, color: FG,
+              transition: "border-color 200ms ease",
+              boxSizing: "border-box",
+            }}>
+              {p.name === "Enterprise" ? "Contact sales" : "Start free"}
+            </div>
+          </a>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+// ─── Docs CTA ──────────────────────────────────────────────────────────────────
+function DocsCTA() {
+  const isMobile = useWindowWidth() < 768;
+  return (
+    <section style={{ maxWidth: 1200, margin: "0 auto", padding: isMobile ? "24px 20px 56px" : "40px 32px 80px" }}>
+      <div style={{ border: `1px solid ${LINE}`, borderRadius: 16, padding: isMobile ? 24 : 40, background: PANEL, display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1.2fr 1fr", gap: isMobile ? 28 : 40, alignItems: "center" }}>
+        <div>
+          <SectionLabel>Ship today</SectionLabel>
+          <h3 style={{ fontFamily: "var(--font-display)", fontSize: 36, lineHeight: 1.08, letterSpacing: "-0.03em", fontWeight: 500, margin: "14px 0 12px" }}>
+            Two lines of code. Zero configuration.
+          </h3>
+          <p style={{ color: MUTED, fontSize: 16, margin: 0, lineHeight: 1.55 }}>
+            Free forever for solo projects. Upgrade when you hit volume.
+          </p>
+          <div style={{ display: "flex", gap: 10, marginTop: 24 }}>
+            <Btn variant="primary" href={REGISTER}>Start free <IcoArrow /></Btn>
+            <Btn variant="ghost" href="/docs">Read the docs</Btn>
+          </div>
+        </div>
+        <div style={{ fontFamily: "var(--font-mono)", fontSize: 13, background: "rgba(0,0,0,0.04)", border: `1px solid ${LINE}`, borderRadius: 10, padding: 20, lineHeight: 1.8, color: FG }}>
+          <div><span style={{ color: A }}>$</span> pip install dottle</div>
+          <div style={{ opacity: 0.5 }}># or</div>
+          <div><span style={{ color: A }}>$</span> npm i @dottle/sdk</div>
+          <div style={{ marginTop: 10, opacity: 0.5 }}># then</div>
+          <div><span style={{ color: A }}>&gt;</span> from dottle import Dottle</div>
         </div>
       </div>
     </section>
   );
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// FOOTER
-// ─────────────────────────────────────────────────────────────────────────────
-
+// ─── Footer ────────────────────────────────────────────────────────────────────
 function Footer() {
+  const w = useWindowWidth();
+  const isMobile = w < 768;
+  const isTablet = w < 1024;
+  const gridCols = isMobile ? "1fr 1fr" : isTablet ? "1.3fr repeat(2, 1fr)" : "1.3fr repeat(4, 1fr)";
   return (
-    <footer className="border-t border-[#1F2937] py-8 px-6">
-      <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
-        <div className="flex items-center gap-2">
-          <div className="w-5 h-5 rounded-md bg-[#2F3E2C] border border-[#4F6F5230] flex items-center justify-center">
-            <Shield size={11} className="text-[#6B8F6E]" />
-          </div>
-          <span className="text-sm font-medium text-[#4B5563]">Dottle</span>
+    <footer style={{ borderTop: `1px solid ${LINE}`, padding: isMobile ? "40px 20px 28px" : "56px 32px 32px" }}>
+      <div style={{ maxWidth: 1200, margin: "0 auto", display: "grid", gridTemplateColumns: gridCols, gap: isMobile ? 32 : 32 }}>
+        <div style={{ gridColumn: isMobile ? "1 / -1" : undefined }}>
+          <Wordmark size={22} />
+          <p style={{ color: MUTED, fontSize: 13.5, lineHeight: 1.55, margin: "12px 0 0", maxWidth: 260 }}>
+            Production monitoring for AI agents. Built by engineers who&rsquo;ve shipped agents to prod.
+          </p>
         </div>
-        <p className="text-[13px] text-[#2D3748]">
-          Built for teams running AI agents in production.
-        </p>
-        <p className="text-[13px] text-[#2D3748]">© 2026 Dottle</p>
+        {FOOTER_COLS.slice(0, isMobile ? 2 : isTablet ? 2 : 4).map(c => (
+          <div key={c.h}>
+            <div style={{ fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: MUTED, marginBottom: 12 }}>{c.h}</div>
+            <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "grid", gap: 8 }}>
+              {c.items.map(item => <li key={item} style={{ fontSize: 14, color: FG, cursor: "pointer" }}>{item}</li>)}
+            </ul>
+          </div>
+        ))}
+      </div>
+      <div style={{ maxWidth: 1200, margin: "40px auto 0", paddingTop: 20, borderTop: `1px solid ${LINE}`, display: "flex", flexWrap: "wrap", gap: 12, alignItems: "center", fontFamily: "var(--font-mono)", fontSize: 12, color: MUTED }}>
+        <span>© 2026 Dottle, Inc.</span>
+        {/* <span style={{ marginLeft: isMobile ? 0 : "auto" }}>Backed by Y Combinator · SF</span> */}
       </div>
     </footer>
   );
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// PAGE
-// ─────────────────────────────────────────────────────────────────────────────
-
+// ─── Page ──────────────────────────────────────────────────────────────────────
 export default function Home() {
+  const [navDark, setNavDark] = useState(false);
   return (
-    <>
-      <Nav />
+    <div style={{ background: BG, color: FG, fontFamily: "var(--font-sans)" }}>
+      <Nav dark={navDark} />
       <main>
         <Hero />
-        <TrustStrip />
-        <ScrollSteps />
-        <Solution />
+        <Features />
         <HowItWorks />
-        <Comparison />
-        <WhoItsFor />
-        <CTA />
+        <AlertsReel onDarkChange={setNavDark} />
+        <Testimonials />
+        <Pricing />
+        <DocsCTA />
       </main>
       <Footer />
-    </>
+    </div>
   );
 }
