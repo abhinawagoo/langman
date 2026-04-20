@@ -1,12 +1,13 @@
 "use client";
 import Script from "next/script";
 
-export default function GoogleAnalytics({ gaId }: { gaId: string }) {
-  if (!gaId) return null;
+const GA_ID = "G-E5RX0QFQ12";
+
+export default function GoogleAnalytics() {
   return (
     <>
       <Script
-        src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`}
+        src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}
         strategy="afterInteractive"
       />
       <Script id="google-analytics" strategy="afterInteractive">
@@ -14,7 +15,7 @@ export default function GoogleAnalytics({ gaId }: { gaId: string }) {
           window.dataLayer = window.dataLayer || [];
           function gtag(){dataLayer.push(arguments);}
           gtag('js', new Date());
-          gtag('config', '${gaId}', { page_path: window.location.pathname });
+          gtag('config', '${GA_ID}');
         `}
       </Script>
     </>

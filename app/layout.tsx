@@ -15,7 +15,6 @@ const geistMono = Geist_Mono({
   display: "swap",
 });
 
-const GA_ID = process.env.NEXT_PUBLIC_GA_ID ?? "";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://dottle.dev"),
@@ -148,7 +147,7 @@ export default function RootLayout({
         />
       </head>
       <body className="antialiased">
-        <GoogleAnalytics gaId={GA_ID} />
+        <GoogleAnalytics />
         {children}
       </body>
     </html>
