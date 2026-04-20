@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import GoogleAnalytics from "./components/GoogleAnalytics";
 
 const geistSans = Geist({
   subsets: ["latin"],
@@ -14,6 +15,8 @@ const geistMono = Geist_Mono({
   display: "swap",
 });
 
+const GA_ID = process.env.NEXT_PUBLIC_GA_ID ?? "";
+
 export const metadata: Metadata = {
   metadataBase: new URL("https://dottle.dev"),
   title: {
@@ -21,7 +24,7 @@ export const metadata: Metadata = {
     template: "%s | Dottle",
   },
   description:
-    "Dottle monitors your AI agents in production. Detects failures, explains root causes, and alerts you before your users notice.",
+    "Dottle monitors your AI agents in production. Detects silent failures, loops, tool errors, and drift — and explains root causes before your users notice.",
   keywords: [
     "AI agent monitoring",
     "agent failure detection",
@@ -31,10 +34,15 @@ export const metadata: Metadata = {
     "production AI agents",
     "LLM monitoring",
     "AI agent tracing",
+    "agent loop detection",
+    "AI drift detection",
+    "OpenAI agents monitoring",
+    "LangGraph observability",
   ],
   authors: [{ name: "Dottle", url: "https://dottle.dev" }],
   creator: "Dottle",
   publisher: "Dottle",
+  category: "Technology",
   robots: {
     index: true,
     follow: true,
@@ -52,19 +60,80 @@ export const metadata: Metadata = {
     url: "https://dottle.dev",
     title: "Dottle — AI Agent Failure Detection",
     description:
-      "Dottle monitors your AI agents in production. Detects failures, explains root causes, and alerts you before your users notice.",
+      "Dottle monitors your AI agents in production. Detects silent failures, loops, and drift — and explains root causes before your users notice.",
     siteName: "Dottle",
+    images: [
+      {
+        url: "/opengraph-image",
+        width: 1200,
+        height: 630,
+        alt: "Dottle — AI Agent Failure Detection",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "Dottle — AI Agent Failure Detection",
     description:
-      "Dottle monitors your AI agents in production. Detects failures, explains root causes, and alerts you before your users notice.",
+      "Dottle monitors your AI agents in production. Detects silent failures, loops, and drift — and explains root causes before your users notice.",
     creator: "@dottle_dev",
+    images: ["/opengraph-image"],
   },
   alternates: {
     canonical: "https://dottle.dev",
   },
+};
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://dottle.dev/#org",
+      name: "Dottle",
+      url: "https://dottle.dev",
+      logo: "https://dottle.dev/opengraph-image",
+      sameAs: ["https://twitter.com/dottle_dev"],
+      contactPoint: {
+        "@type": "ContactPoint",
+        contactType: "sales",
+        url: "https://cal.com/abhinawago/30min",
+      },
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://dottle.dev/#website",
+      url: "https://dottle.dev",
+      name: "Dottle",
+      publisher: { "@id": "https://dottle.dev/#org" },
+    },
+    {
+      "@type": "SoftwareApplication",
+      "@id": "https://dottle.dev/#product",
+      name: "Dottle",
+      applicationCategory: "DeveloperApplication",
+      operatingSystem: "Web",
+      url: "https://dottle.dev",
+      description:
+        "AI agent monitoring platform. Detects silent failures, loops, tool errors, and behavioral drift in production AI agents.",
+      offers: [
+        {
+          "@type": "Offer",
+          name: "Hobby",
+          price: "0",
+          priceCurrency: "USD",
+          description: "10k traces/month, free forever",
+        },
+        {
+          "@type": "Offer",
+          name: "Team",
+          price: "199",
+          priceCurrency: "USD",
+          description: "1M traces/month, Slack + PagerDuty alerts",
+        },
+      ],
+    },
+  ],
 };
 
 export default function RootLayout({
@@ -72,7 +141,16 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
-      <body className="antialiased">{children}</body>
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      </head>
+      <body className="antialiased">
+        <GoogleAnalytics gaId={GA_ID} />
+        {children}
+      </body>
     </html>
   );
 }

@@ -146,11 +146,12 @@ const PLANS = [
   { name: "Enterprise", price: "Custom", tag: "Talk to us",           feats: ["Unlimited volume", "Self-hosted option", "SAML + SCIM", "Dedicated support", "Custom detections"], featured: false },
 ];
 
-const FOOTER_COLS = [
-  { h: "Product",    items: ["Overview", "Tracing", "Alerts", "A/B testing", "Changelog"]               },
-  { h: "Developers", items: ["Documentation", "Python SDK", "TypeScript SDK", "API reference", "Status"]  },
-  { h: "Company",    items: ["About", "Customers", "Careers", "Blog", "Contact"]                         },
-  { h: "Legal",      items: ["Privacy", "Terms", "Security", "SOC 2", "DPA"]                             },
+type FooterItem = string | { label: string; href: string };
+const FOOTER_COLS: { h: string; items: FooterItem[] }[] = [
+  { h: "Product",    items: ["Overview", "Tracing", "Alerts", "A/B testing", "Changelog"] },
+  { h: "Developers", items: ["Documentation", { label: "Python SDK", href: "https://pypi.org/project/dottle-sdk/" }, "TypeScript SDK", "API reference", "Status"] },
+  { h: "Company",    items: ["About", "Customers", "Careers", "Blog", "Contact"] },
+  { h: "Legal",      items: ["Privacy", "Terms", "Security", "SOC 2", "DPA"] },
 ];
 
 const AGENT_CODE = `from dottle import Dottle
@@ -908,7 +909,13 @@ function Footer() {
           <div key={c.h}>
             <div style={{ fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: MUTED, marginBottom: 12 }}>{c.h}</div>
             <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "grid", gap: 8 }}>
-              {c.items.map(item => <li key={item} style={{ fontSize: 14, color: FG, cursor: "pointer" }}>{item}</li>)}
+              {c.items.map(item => {
+                const isLink = typeof item === "object";
+                const label = isLink ? item.label : item;
+                return isLink
+                  ? <li key={label}><a href={item.href} target="_blank" rel="noopener noreferrer" style={{ fontSize: 14, color: FG, textDecoration: "none", cursor: "pointer" }}>{label}</a></li>
+                  : <li key={label} style={{ fontSize: 14, color: FG, cursor: "pointer" }}>{label}</li>;
+              })}
             </ul>
           </div>
         ))}

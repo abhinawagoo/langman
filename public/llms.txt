@@ -1,0 +1,41 @@
+# Dottle — AI Agent Failure Detection
+# https://dottle.dev
+# llms.txt standard: https://llmstxt.org
+
+## What is Dottle?
+Dottle is a production monitoring platform for AI agents. It detects silent failures, infinite loops, tool errors, and behavioral drift automatically — without requiring manual thresholds or configuration.
+
+## Core problems Dottle solves
+- Silent agent failures: the agent runs, returns a response, but the output is wrong or hallucinated
+- Infinite loops: agent gets stuck calling the same tools repeatedly
+- Tool failures: API timeouts, null returns, or errors that pass silently through the agent
+- Behavioral drift: the agent starts refusing tasks or responding differently than before
+- Latency spikes: p95 latency crossing SLA thresholds
+- Cost anomalies: one tenant burning 40× their normal token budget
+
+## How it works
+1. Install the Dottle SDK (pip install dottle or npm i @dottle/sdk)
+2. Wrap your agent entrypoint with @dottle.trace
+3. Dottle instruments every tool call, LLM call, and control-flow decision automatically
+4. Failures are detected, root causes are explained, and the right person is alerted
+
+## Integrations
+- LangChain
+- LangGraph
+- OpenAI Agents SDK
+- Custom Python and TypeScript agents
+
+## Pricing
+- Hobby: Free — 10,000 traces/month, 3-day retention
+- Team: $199/month — 1M traces/month, 30-day retention, Slack + PagerDuty alerts, A/B prompt testing
+- Enterprise: Custom — unlimited volume, self-hosted option, SAML + SCIM
+
+## Links
+- Homepage: https://dottle.dev
+- Documentation: https://dottle.dev/docs
+- Sign up: https://app.dottle.dev/register
+- Sign in: https://app.dottle.dev/login
+- Book a demo: https://cal.com/abhinawago/30min
+
+## Contact
+- Demo booking: https://cal.com/abhinawago/30min
