@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
+import DottleMascot from "./components/dottle-mascot";
 
 // ─── Responsive hook ───────────────────────────────────────────────────────────
 function useWindowWidth() {
@@ -517,8 +518,21 @@ function Nav({ dark = false }: { dark?: boolean }) {
 function Hero() {
   const w = useWindowWidth();
   const isMobile = w < 768;
+  const [mascotLeft] = useState(() => Math.random() > 0.5);
+
   return (
-    <section style={{ maxWidth: 1200, margin: "0 auto", padding: isMobile ? "64px 20px 56px" : "120px 32px 96px" }}>
+    <div style={{ position: "relative", overflow: "hidden" }}>
+      {!isMobile && (
+        <div style={{
+          position: "absolute", top: "50%",
+          transform: "translateY(-55%)",
+          ...(mascotLeft ? { left: -580 } : { right: -580 }),
+          opacity: 0.32, pointerEvents: "none", zIndex: 0,
+        }}>
+          <DottleMascot variant="hero" size={1280} />
+        </div>
+      )}
+    <section style={{ maxWidth: 1200, margin: "0 auto", padding: isMobile ? "64px 20px 56px" : "120px 32px 96px", position: "relative", zIndex: 1 }}>
       <div style={{ maxWidth: 900, margin: "0 auto", textAlign: "center" }}>
         <div style={{ display: "inline-flex", alignItems: "center", gap: 10, padding: "6px 12px", borderRadius: 99, border: `1px solid ${LINE}`, background: PANEL, fontSize: 12, fontFamily: "var(--font-mono)", color: MUTED }}>
           <span style={{ width: 6, height: 6, borderRadius: 99, background: A, display: "inline-block" }} />
@@ -549,6 +563,7 @@ function Hero() {
         ))}
       </div>
     </section>
+    </div>
   );
 }
 

@@ -2,12 +2,11 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import DottleMascot from "../components/dottle-mascot";
+import DottleMascot from "./components/dottle-mascot";
 
-const A   = "#D97757";
-const BG  = "#FAFAF9";
-const FG  = "#111111";
-const CAL = "https://cal.com/abhinawago/30min";
+const A  = "#D97757";
+const BG = "#FAFAF9";
+const FG = "#111111";
 
 function useWindowWidth() {
   const [w, setW] = useState(1280);
@@ -20,29 +19,17 @@ function useWindowWidth() {
   return w;
 }
 
-export default function DocsPage() {
+export default function NotFound() {
   const w = useWindowWidth();
-  const mascotSize = Math.min(880, Math.max(280, w * 0.75));
+  const mascotSize = Math.min(1280, Math.max(320, w * 0.88));
 
   return (
     <div style={{
       background: BG, color: FG, fontFamily: "var(--font-sans)",
       minHeight: "100vh", display: "flex", flexDirection: "column",
-      position: "relative", overflow: "hidden",
+      overflow: "hidden",
     }}>
-      {/* Mascot — absolutely centered, behind everything */}
-      <div style={{
-        position: "absolute",
-        top: "50%", left: "50%",
-        transform: "translate(-50%, -46%)",
-        pointerEvents: "none", zIndex: 0,
-        opacity: 0.22,
-      }}>
-        <DottleMascot variant="sleeping" size={mascotSize} />
-      </div>
-
-      {/* Back button */}
-      <div style={{ padding: "28px 36px", position: "relative", zIndex: 2 }}>
+      <div style={{ padding: "28px 36px" }}>
         <Link
           href="/"
           style={{
@@ -55,40 +42,39 @@ export default function DocsPage() {
         </Link>
       </div>
 
-      {/* Centered content — sits on top of mascot */}
       <div style={{
         flex: 1, display: "flex", flexDirection: "column",
         alignItems: "center", justifyContent: "center",
         textAlign: "center", padding: "0 32px 80px",
-        position: "relative", zIndex: 1,
       }}>
-        <p style={{
-          margin: "0 0 8px",
+        <DottleMascot variant="detecting" size={mascotSize} />
+        <h1 style={{
+          marginTop: 16, marginBottom: 8,
           fontFamily: "var(--font-display)",
-          fontSize: "clamp(22px, 2.8vw, 32px)",
-          fontWeight: 500,
-          color: FG,
-          letterSpacing: "-0.025em",
+          fontSize: "clamp(28px, 4vw, 48px)",
+          fontWeight: 500, letterSpacing: "-0.03em",
         }}>
-          Docs coming soon.
+          Something went wrong
+        </h1>
+        <p style={{
+          marginTop: 0, marginBottom: 40,
+          color: "rgba(17,17,17,0.45)", fontSize: 16,
+          lineHeight: 1.6, maxWidth: 360,
+        }}>
+          We couldn&rsquo;t find that page. The agent may have taken a wrong turn.
         </p>
-        <p style={{ margin: "0 0 40px", color: "rgba(17,17,17,0.45)", fontSize: 16, lineHeight: 1.6, maxWidth: 360 }}>
-          In the meantime, book a call and we&rsquo;ll walk you through everything.
-        </p>
-        <a
-          href={CAL}
-          target="_blank"
-          rel="noopener noreferrer"
+        <Link
+          href="/"
           style={{
-            display: "inline-flex", alignItems: "center", gap: 10,
+            display: "inline-flex", alignItems: "center", gap: 8,
             padding: "13px 28px", borderRadius: 9,
             fontFamily: "var(--font-sans)", fontSize: 15, fontWeight: 500,
             background: A, color: "#fff", textDecoration: "none",
             letterSpacing: "-0.01em",
           }}
         >
-          Book a Call →
-        </a>
+          Go home →
+        </Link>
       </div>
     </div>
   );

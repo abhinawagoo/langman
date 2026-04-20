@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import GoogleAnalytics from "./components/GoogleAnalytics";
+import DottleFavicon from "./components/dottle-favicon";
 
 const geistSans = Geist({
   subsets: ["latin"],
@@ -148,6 +149,7 @@ export default function RootLayout({
       </head>
       <body className="antialiased">
         <GoogleAnalytics />
+        <DottleFavicon />
         {children}
       </body>
     </html>
