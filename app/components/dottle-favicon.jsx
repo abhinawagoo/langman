@@ -15,14 +15,17 @@ export default function DottleFavicon() {
     let lastTime = 0
     let isSleeping = false
 
+    // Remove any static favicon links injected by Next.js, then keep one canonical one
+    let faviconLink = null
     const setFavicon = () => {
-      let link = document.querySelector("link[rel~='icon']")
-      if (!link) {
-        link = document.createElement('link')
-        link.rel = 'icon'
-        document.head.appendChild(link)
+      if (!faviconLink || !document.head.contains(faviconLink)) {
+        document.querySelectorAll("link[rel*='icon']").forEach(el => el.remove())
+        faviconLink = document.createElement('link')
+        faviconLink.rel = 'icon'
+        faviconLink.type = 'image/png'
+        document.head.appendChild(faviconLink)
       }
-      link.href = canvas.toDataURL()
+      faviconLink.href = canvas.toDataURL()
     }
 
     const drawFace = (eyeScaleY, sleeping) => {
