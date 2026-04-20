@@ -170,6 +170,39 @@ def run_agent(user_msg: str):
 # failures are flagged automatically.`;
 
 // ─── Shared primitives ─────────────────────────────────────────────────────────
+function MascotFace({ size = 28 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden>
+      <defs>
+        <style>{`
+          @keyframes mf-blink {
+            0%,88%,100% { transform: scaleY(1); }
+            93%          { transform: scaleY(0.08); }
+          }
+          .mf-eyeL { animation: mf-blink 4s ease-in-out infinite; transform-origin: 23px 32px; }
+          .mf-eyeR { animation: mf-blink 4s ease-in-out infinite 0.12s; transform-origin: 41px 31px; }
+        `}</style>
+      </defs>
+      <circle cx="32" cy="34" r="28" fill="#C8613A"/>
+      <circle cx="28" cy="30" r="16" fill="#B8542F"/>
+      <line x1="32" y1="12" x2="32" y2="5" stroke="#C8613A" strokeWidth="2.5" strokeLinecap="round"/>
+      <circle cx="32" cy="4" r="3.5" fill="#C8613A"/>
+      <circle cx="32" cy="4" r="1.8" fill="#FFF5F0"/>
+      <g className="mf-eyeL">
+        <circle cx="23" cy="32" r="8" fill="#FFF5F0"/>
+        <circle cx="24.5" cy="33.5" r="4" fill="#1A1917"/>
+        <circle cx="25.5" cy="32" r="1.5" fill="white"/>
+      </g>
+      <g className="mf-eyeR">
+        <circle cx="41" cy="31" r="8" fill="#FFF5F0"/>
+        <circle cx="42.5" cy="32.5" r="4" fill="#1A1917"/>
+        <circle cx="43.5" cy="31" r="1.5" fill="white"/>
+      </g>
+      <path d="M26 40 Q32 47 38 40" fill="none" stroke="#1A1917" strokeWidth="2.2" strokeLinecap="round"/>
+    </svg>
+  );
+}
+
 function Wordmark({ size = 22, color = FG }: { size?: number; color?: string }) {
   return (
     <span style={{ display: "inline-flex", alignItems: "baseline", fontFamily: "var(--font-display)", fontWeight: 500, fontSize: size, letterSpacing: "-0.02em", color, lineHeight: 1, transition: "color 400ms ease" }}>
@@ -491,7 +524,10 @@ function Nav({ dark = false }: { dark?: boolean }) {
       transition: "background 400ms ease, border-color 400ms ease",
     }}>
       <div style={{ maxWidth: 1200, margin: "0 auto", padding: isMobile ? "14px 20px" : "14px 32px", display: "flex", alignItems: "center", gap: 24 }}>
-        <Wordmark color={dark ? DFG : FG} />
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <MascotFace size={28} />
+          <Wordmark color={dark ? DFG : FG} />
+        </div>
         {!isMobile && (
           <div style={{ display: "flex", gap: 24, fontSize: 13.5, color: dark ? "rgba(250,250,249,0.6)" : MUTED, transition: "color 400ms ease" }}>
             {([
@@ -518,7 +554,8 @@ function Nav({ dark = false }: { dark?: boolean }) {
 function Hero() {
   const w = useWindowWidth();
   const isMobile = w < 768;
-  const [mascotLeft] = useState(() => Math.random() > 0.5);
+  const [mascotLeft, setMascotLeft] = useState(false);
+  useEffect(() => { setMascotLeft(Math.random() > 0.5); }, []);
 
   return (
     <div style={{ position: "relative", overflow: "hidden" }}>
@@ -915,7 +952,10 @@ function Footer() {
     <footer style={{ borderTop: `1px solid ${LINE}`, padding: isMobile ? "40px 20px 28px" : "56px 32px 32px" }}>
       <div style={{ maxWidth: 1200, margin: "0 auto", display: "grid", gridTemplateColumns: gridCols, gap: isMobile ? 32 : 32 }}>
         <div style={{ gridColumn: isMobile ? "1 / -1" : undefined }}>
-          <Wordmark size={22} />
+          <div style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
+            <MascotFace size={24} />
+            <Wordmark size={22} />
+          </div>
           <p style={{ color: MUTED, fontSize: 13.5, lineHeight: 1.55, margin: "12px 0 0", maxWidth: 260 }}>
             Production monitoring for AI agents. Built by engineers who&rsquo;ve shipped agents to prod.
           </p>
