@@ -63,7 +63,7 @@ export const metadata: Metadata = {
     siteName: "Dottle",
     images: [
       {
-        url: "/opengraph-image",
+        url: "https://dottle.dev/og-image.png",
         width: 1200,
         height: 630,
         alt: "Dottle — AI Agent Failure Detection",
@@ -76,7 +76,7 @@ export const metadata: Metadata = {
     description:
       "Dottle monitors your AI agents in production. Detects silent failures, loops, and drift — and explains root causes before your users notice.",
     creator: "@dottle_dev",
-    images: ["/opengraph-image"],
+    images: ["https://dottle.dev/og-image.png"],
   },
   alternates: {
     canonical: "https://dottle.dev",
